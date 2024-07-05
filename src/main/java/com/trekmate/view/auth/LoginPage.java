@@ -18,7 +18,7 @@ import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-public class LoginController extends Application {
+public class LoginPage extends Application {
     @Override
     public void start(Stage primaryStage) {
         // Load the background image
