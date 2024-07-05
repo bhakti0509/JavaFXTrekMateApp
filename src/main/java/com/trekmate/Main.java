@@ -1,12 +1,18 @@
 package com.trekmate;
 
-import com.trekmate.view.auth.SignUpController;
-
 import javafx.application.Application;
+import com.trekmate.firebase.FirebaseInitializer;
+import com.trekmate.view.auth.LoginPage;
 
 public class Main {
     public static void main(String[] args){
-        Application.launch(SignUpController.class,args);
+
+        try {
+            FirebaseInitializer.initializeFirebase("firebase.json");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Application.launch(LoginPage.class,args);
     }
   
 }

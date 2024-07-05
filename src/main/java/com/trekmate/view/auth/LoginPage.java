@@ -1,7 +1,6 @@
 package com.trekmate.view.auth;
 
 import javafx.animation.FadeTransition;
-import javafx.animation.RotateTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -12,9 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -22,9 +19,7 @@ public class LoginPage extends Application {
     @Override
     public void start(Stage primaryStage) {
         // Load the background image
-        Image backgroundImage = new Image("images/fortsrajgad.jpg");
-        Image ig = new Image("images/coremain.png");
-        ImageView iv = new ImageView(ig);
+        Image backgroundImage = new Image("images/RajgadFort.jpg");
 
         // Create a BackgroundImage
         BackgroundImage background = new BackgroundImage(backgroundImage,
@@ -38,9 +33,6 @@ public class LoginPage extends Application {
                         true,
                         true));
 
-        VBox v = new VBox(iv);
-        v.setLayoutX(50);
-        v.setAlignment(Pos.TOP_CENTER);
 
         // Create a Pane and set its background
         Pane pane = new Pane();
@@ -84,7 +76,6 @@ public class LoginPage extends Application {
 
         // Add the login form to the Pane
         pane.getChildren().add(loginForm);
-        pane.getChildren().add(v);
 
         // Create a translate transition to move the login form into view
         TranslateTransition translateTransition = new TranslateTransition(Duration.seconds(7), loginForm);
@@ -97,13 +88,6 @@ public class LoginPage extends Application {
         // Play both transitions together
         translateTransition.play();
         fadeTransition.play();
-
-        // Create a rotate transition for the ImageView
-        RotateTransition rotateTransition = new RotateTransition(Duration.seconds(1.5), iv);
-        rotateTransition.setByAngle(360);
-        rotateTransition.setAxis(Rotate.Y_AXIS);
-        rotateTransition.setCycleCount(RotateTransition.INDEFINITE);
-        rotateTransition.play();
 
         // Setting the scene
         Scene scene = new Scene(pane, 400, 300);
