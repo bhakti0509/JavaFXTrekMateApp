@@ -3,6 +3,7 @@ package com.trekmate.view.auth;
 import com.trekmate.firebase.FirebaseAuthService;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -61,6 +62,32 @@ public class SignUpPage extends Application {
 
         Button signUpButton = new Button("Sign Up");
         signUpButton.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
+
+        Label signInLink = new Label("Already have an account? Sign in here.");
+        signInLink.setStyle("-fx-text-fill: blue; -fx-underline: true; -fx-cursor: hand;");
+        signInLink.setOnMouseClicked(event -> loadLoginPage(primaryStage));
+
+        HBox nameFields = new HBox(20, firstNameField, lastNameField);
+        nameFields.setAlignment(Pos.CENTER);
+
+        signUpForm.getChildren().addAll(titleLabel, nameFields, emailField, usernameField, passwordField, signUpButton, signInLink);
+
+        // Add the signup form to the StackPane
+        stackPane.getChildren().add(signUpForm);
+
+        signUpForm.setOpacity(0); // Start fully transparent
+
+        // Create a fade transition for the signup form
+        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), signUpForm);
+        fadeTransition.setToValue(1); // Fade to fully opaque
+        fadeTransition.play();
+
+        // Setting the scene
+        Scene scene = new Scene(stackPane, 700, 600);
+        primaryStage.setTitle("Sign Up");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
         signUpButton.setOnAction(event -> {
             boolean isValid = true;
 
@@ -100,48 +127,43 @@ public class SignUpPage extends Application {
             }
 
             if (isValid) {
-                String email = emailField.getText();
-                String username = usernameField.getText();
-                String password = passwordField.getText();
-                String firstName = firstNameField.getText();
-                String lastName = lastNameField.getText();
+                // Show loading indicator
+                ProgressIndicator progressIndicator = new ProgressIndicator();
+                stackPane.getChildren().add(progressIndicator);
 
-                FirebaseAuthService firebaseAuthService = new FirebaseAuthService();
-                try {
-                    firebaseAuthService.createUser(email, password, username, firstName, lastName, "user");
-                    loadLoginPage(primaryStage);
-                } catch (Exception e) {
-                    showAlert(Alert.AlertType.ERROR, "Sign Up Failed", e.getMessage());
-                }
+                Task<Void> signUpTask = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        String email = emailField.getText();
+                        String username = usernameField.getText();
+                        String password = passwordField.getText();
+                        String firstName = firstNameField.getText();
+                        String lastName = lastNameField.getText();
+
+                        FirebaseAuthService firebaseAuthService = new FirebaseAuthService();
+                        firebaseAuthService.createUser(email, password, username, firstName, lastName, "user");
+                        return null;
+                    }
+
+                    @Override
+                    protected void succeeded() {
+                        stackPane.getChildren().remove(progressIndicator);
+                        loadLoginPage(primaryStage);
+                    }
+
+                    @Override
+                    protected void failed() {
+                        stackPane.getChildren().remove(progressIndicator);
+                        Throwable e = getException();
+                        showAlert(Alert.AlertType.ERROR, "Sign Up Failed", e.getMessage());
+                    }
+                };
+
+                new Thread(signUpTask).start();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Sign Up Failed", "Please fill in all required fields correctly.");
             }
         });
-
-        Label signInLink = new Label("Already have an account? Sign in!!");
-        signInLink.setStyle("-fx-text-fill: blue; -fx-underline: true; -fx-cursor: hand;");
-        signInLink.setOnMouseClicked(event -> loadLoginPage(primaryStage));
-
-        HBox nameFields = new HBox(20, firstNameField, lastNameField);
-        nameFields.setAlignment(Pos.CENTER);
-
-        signUpForm.getChildren().addAll(titleLabel, nameFields, emailField, usernameField, passwordField, signUpButton, signInLink);
-
-        // Add the signup form to the StackPane
-        stackPane.getChildren().add(signUpForm);
-
-        signUpForm.setOpacity(0); // Start fully transparent
-
-        // Create a fade transition for the signup form
-        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), signUpForm);
-        fadeTransition.setToValue(1); // Fade to fully opaque
-        fadeTransition.play();
-
-        // Setting the scene
-        Scene scene = new Scene(stackPane, 700, 600);
-        primaryStage.setTitle("Sign Up");
-        primaryStage.setScene(scene);
-        primaryStage.show();
     }
 
     private boolean isValidEmail(String email) {
