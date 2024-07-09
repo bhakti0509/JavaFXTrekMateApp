@@ -1,5 +1,6 @@
 package com.trekmate.view.dashboards;
 
+import com.trekmate.session.UserSession;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Point3D;
@@ -11,29 +12,43 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import java.util.Map;
 
-public class UserPage extends Application{
+public class UserPage extends Application {
+
+    private UserSession userSession = new UserSession();
 
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("TrekMate");
-        primaryStage.setFullScreen(true);
 
-        GridPane grid = new GridPane();
-        grid.setPadding(new Insets(300, 30, 10, 80));
-        grid.setVgap(50);
-        grid.setHgap(100);
+        Group root = new Group();
+        Scene scene = new Scene(root, 800, 600);
 
-        Text appName = new Text(180, 110, "TrekMate");
+        HBox navBar = createNavBar();
+        GridPane grid = createGrid();
+
+        VBox layout = new VBox(20);
+        layout.getChildren().addAll(navBar, grid);
+        layout.setAlignment(Pos.TOP_CENTER);
+
+        root.getChildren().addAll(layout);
+
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private Text createAppName() {
+        Text appName = new Text( "TrekMate");
         appName.setFill(Color.GREEN);
-        appName.setStyle("-fx-font-size: 60px;-fx-font-weight: Bold;");
+        appName.setStyle("-fx-font-size: 40px;-fx-font-weight: Bold;");
         appName.setRotationAxis(Point3D.ZERO);
 
         DropShadow dropShadow = new DropShadow();
@@ -41,94 +56,104 @@ public class UserPage extends Application{
         dropShadow.setOffsetX(5);
         dropShadow.setOffsetY(5);
         appName.setEffect(dropShadow);
-        
-        Button myBookingsButton= new Button("My Bookings");
-        
-        Button loginButton = new Button("Login");
 
-        Button signUpButton = new Button("Sign Up");
+        return appName;
+    }
 
-        Button profileButton = new Button("Profile");
+    private ImageView createLogoView() {
+        ImageView logoView = new ImageView(new Image("images/logo.jpg")); // Placeholder image
+        logoView.setFitHeight(60);
+        logoView.setFitWidth(60);
+        logoView.setClip(new javafx.scene.shape.Circle(30, 30, 30));
+        return logoView;
+    }
 
-        Button settingsButton = new Button("Settings");
-
-        Button leaderboardButton = new Button("Leaderboard");
-
-
-        myBookingsButton.setPrefSize(200, 20);
-        myBookingsButton.setStyle("-fx-font-size: 20px;-fx-background-color: White; -fx-padding: 10;-fx-font-weight: bold;");
-
-        loginButton.setPrefSize(150, 20);
-        loginButton.setStyle("-fx-font-size: 20px;-fx-background-color: White; -fx-padding: 10;-fx-font-weight: bold;");
-
-        signUpButton.setPrefSize(150, 20);
-        signUpButton.setStyle("-fx-font-size: 20px;-fx-background-color: White; -fx-padding: 10;-fx-font-weight: bold;");
-
-        profileButton.setPrefSize(150, 20);
-        profileButton.setStyle("-fx-font-size: 20px;-fx-background-color: White; -fx-padding: 10;-fx-font-weight: bold;");
-
-        settingsButton.setPrefSize(150, 20);
-        settingsButton.setStyle("-fx-font-size: 20px;-fx-background-color: White; -fx-padding: 10;-fx-font-weight: bold;");
-
-        leaderboardButton.setPrefSize(200, 20);
-        leaderboardButton.setStyle("-fx-font-size: 20px;-fx-background-color: White; -fx-padding: 10;-fx-font-weight: bold;");
-
-        loginButton.setOnAction(event ->{
-
-                
-
-        });
-       
-        Image logo = new Image("images/logo.jpg");
-        ImageView logoView = new ImageView(logo);
-        logoView.setFitHeight(150);
-        logoView.setFitWidth(150);
-        logoView.setLayoutX(20);
-        logoView.setLayoutY(20);
-        logoView.setPreserveRatio(true);
-
-        HBox navBar = new HBox(10); // 10 is the spacing between buttons
-        navBar.getChildren().addAll(myBookingsButton,leaderboardButton,loginButton,signUpButton,profileButton,settingsButton);
+    private HBox createNavBar() {
+        HBox navBar = new HBox(10);
+        navBar.setAlignment(Pos.CENTER_LEFT);
+        navBar.setPrefSize(Screen.getPrimary().getBounds().getWidth(), 20);
+        navBar.setStyle("-fx-background-color: #333;");
         navBar.setPadding(new Insets(10));
-        navBar.setAlignment(Pos.CENTER);
-        navBar.setPrefSize(2700, 20);
 
-        VBox layout = new VBox(10);
-        layout.getChildren().addAll(navBar);
-        layout.setPadding(new Insets(30));
-        layout.setAlignment(Pos.TOP_CENTER);
+        Text appName = createAppName();
+        ImageView logoView = createLogoView();
+        Button myBookingsButton = createNavButton("My Bookings", 200);
+        Button leaderboardButton = createNavButton("Leaderboard", 200);
+        
 
-        // Create course tiles
-        addTrekTile(grid, "Rajgad Fort","images/RajgadFort.jpg",  0, 0);
+        if (userSession.isLoggedIn()) {
+            Map<String, Object> userDetails = userSession.getUserDetails();
+            String firstName = (String) userDetails.get("firstName");
+            String lastName = (String) userDetails.get("lastName");
+            Label userNameLabel = new Label(firstName + " " + lastName);
+            userNameLabel.setStyle("-fx-font-size: 20px;-fx-text-fill: white;-fx-font-weight: bold;");
+
+            ImageView profileImage = new ImageView(new Image("images/logo.jpg")); // Placeholder image
+            profileImage.setFitHeight(40);
+            profileImage.setFitWidth(40);
+            profileImage.setClip(new javafx.scene.shape.Circle(20, 20, 20));
+
+            Button profileButton = createNavButton("Profile", 150);
+            Button settingsButton = createNavButton("Settings", 150);
+
+            HBox userBox = new HBox(10);
+            userBox.setAlignment(Pos.CENTER);
+            userBox.getChildren().addAll(profileImage, userNameLabel);
+
+            navBar.getChildren().addAll(logoView, appName, myBookingsButton, leaderboardButton, profileButton, settingsButton, userBox);
+        } else {
+            Button loginButton = createNavButton("Login", 150);
+            Button signUpButton = createNavButton("Sign Up", 150);
+
+            loginButton.setOnAction(event -> {
+                // Handle login action
+            });
+
+            navBar.getChildren().addAll(logoView, appName, myBookingsButton, leaderboardButton, loginButton, signUpButton);
+        }
+
+        return navBar;
+    }
+
+    private Button createNavButton(String text, int width) {
+        Button button = new Button(text);
+        button.setPrefSize(width, 20);
+        button.setStyle("-fx-font-size: 20px;-fx-background-color: #333;-fx-text-fill: white; -fx-padding: 10;-fx-font-weight: bold;");
+        button.setOnMouseEntered(event -> button.setStyle("-fx-font-size: 20px;-fx-background-color: #777;-fx-text-fill: white; -fx-padding: 10;-fx-font-weight: bold;"));
+        button.setOnMouseExited(event -> button.setStyle("-fx-font-size: 20px;-fx-background-color: #333;-fx-text-fill: white; -fx-padding: 10;-fx-font-weight: bold;"));
+        return button;
+    }
+
+    private GridPane createGrid() {
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(300, 30, 10, 80));
+        grid.setVgap(50);
+        grid.setHgap(100);
+
+        addTrekTile(grid, "Rajgad Fort", "images/RajgadFort.jpg", 0, 0);
         addTrekTile(grid, "Sinhgad Fort", "images/SinhgadFort.jpg", 0, 1);
         addTrekTile(grid, "Purandar Fort", "images/PurandarFort.jpg", 0, 2);
 
-
-       
-        Group group = new Group(logoView,appName,layout,grid);
-
-        Scene scene = new Scene(group,800,600);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        return grid;
     }
 
     private void addTrekTile(GridPane grid, String trekTitle, String imagePath, int row, int col) {
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
 
-        // Trek image
         Image image = new Image(imagePath);
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(500);
         imageView.setFitHeight(500);
 
-        // Trek title
         Label titleLabel = new Label(trekTitle);
         titleLabel.setStyle("-fx-font-size: 36px; -fx-font-weight: bold;");
-        
+
         vbox.getChildren().addAll(imageView, titleLabel);
         grid.add(vbox, col, row);
     }
 
+    public static void main(String[] args) {
+        launch(args);
+    }
 }
-
