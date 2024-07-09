@@ -28,6 +28,14 @@ public class UserSession {
         return null;
     }
 
+    public boolean isAdmin() {
+        Map<String, Object> userDetails = getUserDetails();
+        if (userDetails != null) {
+            return userDetails.get("role").equals("admin");
+        }
+        return false;
+    }
+
     public void clearUserDetails() {
         preferences.remove(USER_DETAILS);
     }
