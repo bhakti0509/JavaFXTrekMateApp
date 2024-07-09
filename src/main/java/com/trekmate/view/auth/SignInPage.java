@@ -1,9 +1,9 @@
 package com.trekmate.view.auth;
 
 import com.trekmate.firebase.FirebaseAuthService;
+import com.trekmate.session.UserSession;
 import com.trekmate.view.dashboards.AdminPage;
 import com.trekmate.view.dashboards.UserPage;
-
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -21,9 +21,11 @@ import java.util.regex.Pattern;
 public class SignInPage extends Application {
 
     private FirebaseAuthService firebaseAuthService;
+    private UserSession userSession;
 
     public SignInPage() {
         this.firebaseAuthService = new FirebaseAuthService();
+        this.userSession = new UserSession();
     }
 
     @Override
@@ -90,6 +92,7 @@ public class SignInPage extends Application {
             if (isValid) {
                 try {
                     Map<String, Object> userData = firebaseAuthService.signIn(emailField.getText(), passwordField.getText());
+                    userSession.saveUserDetails(userData);
                     String role = (String) userData.get("role");
                     if (role.equals("admin")) {
                         loadAdminPage(primaryStage);

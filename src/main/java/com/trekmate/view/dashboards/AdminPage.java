@@ -145,7 +145,7 @@ public class AdminPage extends Application {
         gridPane.setBackground(new Background(background));
 
         // Creating and setting the scene
-        Scene scene = new Scene(gridPane, 600, 500);
+        Scene scene = new Scene(gridPane, primaryStage.getWidth(), primaryStage.getHeight() );
         primaryStage.setScene(scene);
         primaryStage.show();
     }
