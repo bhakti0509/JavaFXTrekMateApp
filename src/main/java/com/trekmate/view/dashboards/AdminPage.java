@@ -132,20 +132,20 @@ public class AdminPage extends Application {
         gridPane.add(saveButton, 0, 10);
         gridPane.add(logoutButton, 1, 10);
 
-        Image backgroundImage = new Image("images/AdminPageBGImage.jpg");
+        // Image backgroundImage = new Image("images/AdminPageBGImage.jpg");
 
-        // Create a BackgroundImage
-        BackgroundImage background = new BackgroundImage(
-                backgroundImage,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.DEFAULT,
-                new BackgroundSize(400, 100, false, false, true, true)
-        );
-        gridPane.setBackground(new Background(background));
+        // // Create a BackgroundImage
+        // BackgroundImage background = new BackgroundImage(
+        //         backgroundImage,
+        //         BackgroundRepeat.NO_REPEAT,
+        //         BackgroundRepeat.NO_REPEAT,
+        //         BackgroundPosition.DEFAULT,
+        //         new BackgroundSize(400, 100, false, false, true, true)
+        // );
+        // gridPane.setBackground(new Background(background));
 
         // Creating and setting the scene
-        Scene scene = new Scene(gridPane, 600, 500);
+        Scene scene = new Scene(gridPane, primaryStage.getWidth(), primaryStage.getHeight() );
         primaryStage.setScene(scene);
         primaryStage.show();
     }
