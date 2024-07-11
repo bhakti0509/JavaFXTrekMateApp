@@ -98,4 +98,14 @@ public class FirebaseAuthService {
     private boolean checkPassword(String plainPassword, String hashedPassword) {
         return BCrypt.checkpw(plainPassword, hashedPassword);
     }
+
+    public Map<String, Object> getUserDetailsByEmail(String email) throws ExecutionException, InterruptedException {
+        ApiFuture<QuerySnapshot> query = firestore.collection("users").whereEqualTo("email", email).get();
+        List<QueryDocumentSnapshot> documents = query.get().getDocuments();
+        if (!documents.isEmpty()) {
+            return documents.get(0).getData();
+        }
+        return null;
+    }
 }
+
