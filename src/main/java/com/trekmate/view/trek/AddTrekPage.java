@@ -40,6 +40,7 @@ public class AddTrekPage extends Application {
     private TextField cost;
 
     private ImageView primaryImageView;
+    private VBox secondaryImageBox;
     private ImageView qrCodeImageView;
 
     public static void main(String[] args) {
@@ -77,7 +78,6 @@ public class AddTrekPage extends Application {
         setupSecondaryImageSection(primaryStage, gridPane);
         setupQRCodeSection(primaryStage, gridPane);
         setupSaveButton(gridPane);
-        setupLogoutButton(gridPane);
 
         return gridPane;
     }
@@ -162,7 +162,7 @@ public class AddTrekPage extends Application {
     }
 
     private void setupSecondaryImageSection(Stage primaryStage, GridPane gridPane) {
-        VBox secondaryImageBox = new VBox(10);
+        secondaryImageBox = new VBox(10);
         Button addSecondaryImagesButton = createButton("Add trek Images", primaryStage, secondaryImageFiles, secondaryImageBox);
         gridPane.add(new Label("Secondary Images:"), 0, 10);
         gridPane.add(addSecondaryImagesButton, 1, 10);
@@ -249,11 +249,6 @@ public class AddTrekPage extends Application {
         gridPane.add(saveButton, 0, 13);
     }
 
-    private void setupLogoutButton(GridPane gridPane) {
-        Button logoutButton = new Button("Logout");
-        gridPane.add(logoutButton, 1, 13);
-    }
-
     private VBox createContainer(GridPane gridPane) {
         VBox container = new VBox(20, gridPane);
         container.setAlignment(Pos.CENTER);
@@ -280,6 +275,7 @@ public class AddTrekPage extends Application {
 
             Trek trek = createTrek(imageUrls, qrCodeUrl);
             saveTrekToFirebase(trek);
+            clearAllFields();
         } catch (InterruptedException | ExecutionException | IOException ex) {
             ex.printStackTrace();
             showErrorAlert("Error saving trip details.");
@@ -335,5 +331,24 @@ public class AddTrekPage extends Application {
     private void showConfirmationAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK);
         alert.showAndWait();
+    }
+
+    private void clearAllFields() {
+        fortName.clear();
+        description.clear();
+        fortLocation.clear();
+        contact.clear();
+        trekDuration.clear();
+        difficultyLevel.clear();
+        openingTime.clear();
+        closingTime.clear();
+        duration.clear();
+        cost.clear();
+        primaryImageFile.clear();
+        primaryImageView.setImage(null);
+        secondaryImageFiles.clear();
+        secondaryImageBox.getChildren().clear();
+        qrCodeFile = null;
+        qrCodeImageView.setImage(null);
     }
 }

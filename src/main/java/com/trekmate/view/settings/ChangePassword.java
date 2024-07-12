@@ -22,8 +22,6 @@ import javafx.util.Duration;
 
 public class ChangePassword extends Application {
 
-
-
     @Override
     public void start(Stage primaryStage) {
 

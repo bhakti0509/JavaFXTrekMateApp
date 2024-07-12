@@ -1,5 +1,7 @@
 package com.trekmate.view.settings;
 
+import com.trekmate.view.components.NavBar;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -119,7 +121,12 @@ public class SettingsPage extends Application {
         Background background = new Background(bgImage);
         grid.setBackground(background);
 
-        Scene settingsScene = new Scene(grid, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+        VBox layout = new VBox();
+        NavBar navBarComponent = new NavBar(primaryStage);
+
+        layout.getChildren().addAll(navBarComponent.createNavBar(), grid);
+
+        Scene settingsScene = new Scene(layout, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
         primaryStage.setScene(settingsScene);
     }
 
