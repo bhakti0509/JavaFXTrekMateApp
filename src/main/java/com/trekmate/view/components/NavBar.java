@@ -2,6 +2,7 @@ package com.trekmate.view.components;
 
 import com.trekmate.session.UserSession;
 import com.trekmate.view.auth.SignInPage;
+import com.trekmate.view.homePage.HomePage;
 import com.trekmate.view.settings.SettingsPage;
 import com.trekmate.view.trek.AddTrekPage;
 
@@ -39,6 +40,7 @@ public class NavBar {
 
         Text appName = createAppName();
         ImageView logoView = createLogoView();
+        Button homePageButton = createNavButton("Home", 150, this::handleHomePage);
         Button myBookingsButton = createNavButton("My Bookings", 200, this::handleMyBookings);
         Button leaderboardButton = createNavButton("Leaderboard", 200, this::handleLeaderboard);
 
@@ -63,7 +65,11 @@ public class NavBar {
             userBox.setAlignment(Pos.CENTER);
             userBox.getChildren().addAll(profileImage, userNameLabel);
 
-            navBar.getChildren().addAll(logoView, appName, myBookingsButton, leaderboardButton, profileButton, settingsButton, createTrekButton, logoutButton, userBox);
+            navBar.getChildren().addAll(logoView, appName, homePageButton, myBookingsButton, leaderboardButton, profileButton, settingsButton);
+            if (userSession.isAdmin()) {
+                navBar.getChildren().add(createTrekButton);
+            }
+            navBar.getChildren().addAll(userBox, logoutButton);
         } else {
             Button loginButton = createNavButton("Login", 150, this::handleLogin);
             Button signUpButton = createNavButton("Sign Up", 150, this::handleSignUp);
@@ -153,6 +159,16 @@ public class NavBar {
         SignInPage signInPage = new SignInPage();
         try {
             signInPage.start(primaryStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleHomePage(javafx.event.ActionEvent event) {
+        // Handle Home button click
+        HomePage homePage = new HomePage();
+        try{
+            homePage.start(primaryStage);
         } catch (Exception e) {
             e.printStackTrace();
         }
