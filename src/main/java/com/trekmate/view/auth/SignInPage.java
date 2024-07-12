@@ -2,16 +2,18 @@ package com.trekmate.view.auth;
 
 import com.trekmate.firebase.FirebaseAuthService;
 import com.trekmate.session.UserSession;
-import com.trekmate.view.dashboards.AdminPage;
-import com.trekmate.view.dashboards.UserPage;
+import com.trekmate.view.homePage.HomePage;
+
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -57,7 +59,7 @@ public class SignInPage extends Application {
         loginForm.setMaxSize(400, 500); // Ensure the size remains fixed
 
         // Add widgets
-        Label titleLabel = new Label("Login");
+        Label titleLabel = new Label("Sign In");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: #333333;");
 
         Label emailLabel = new Label("Email:");
@@ -70,11 +72,16 @@ public class SignInPage extends Application {
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Enter your password");
 
+        // Create a loading indicator
+        ProgressIndicator loadingIndicator = new ProgressIndicator();
+        loadingIndicator.setVisible(false); // Initially hidden
+
         Button loginButton = new Button("Login");
         loginButton.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
         loginButton.setOnAction(event -> {
             boolean isValid = true;
 
+            // Validate the email and password fields
             if (emailField.getText().isEmpty() || !isValidEmail(emailField.getText())) {
                 emailField.setStyle("-fx-border-color: red;");
                 isValid = false;
@@ -90,30 +97,53 @@ public class SignInPage extends Application {
             }
 
             if (isValid) {
-                try {
-                    Map<String, Object> userData = firebaseAuthService.signIn(emailField.getText(), passwordField.getText());
-                    userSession.saveUserDetails(userData);
-                    String role = (String) userData.get("role");
-                    if (role.equals("admin")) {
-                        loadAdminPage(primaryStage);
-                    } else {
+                // Show loading indicator
+                ProgressIndicator progressIndicator = new ProgressIndicator();
+                stackPane.getChildren().add(progressIndicator);
+
+                Task<Void> task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        // Sign in the user
+                        Map<String, Object> userData = firebaseAuthService.signIn(emailField.getText(), passwordField.getText());
+
+                        // Save the user details in the session
+                        userSession.saveUserDetails(userData);
+                        return null;
+                    }
+
+                    @Override
+                    protected void succeeded() {
+                        super.succeeded();
+                        // Hide the loading indicator
+                        progressIndicator.setVisible(false);
                         loadHomePage(primaryStage);
                     }
-                } catch (Exception e) {
-                    showAlert(Alert.AlertType.ERROR, "Login Failed", e.getMessage());
-                }
+
+                    @Override
+                    protected void failed() {
+                        super.failed();
+                        // Hide the loading indicator
+                        progressIndicator.setVisible(false);
+                        showAlert(Alert.AlertType.ERROR, "Login Failed", "Invalid email or password.");
+                    }
+                };
+
+                // Run the task on a new thread
+                new Thread(task).start();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Login Failed", "Please fill in all required fields correctly.");
             }
         });
 
+        // Create a sign-up link to navigate to the sign-up page
         Label signUpLink = new Label("Don't have an account? Sign up!");
         signUpLink.setStyle("-fx-text-fill: blue; -fx-underline: true; -fx-cursor: hand;");
         signUpLink.setOnMouseClicked(event -> loadSignUpPage(primaryStage));
 
-        loginForm.getChildren().addAll(titleLabel, emailLabel, emailField, passwordLabel, passwordField, loginButton, signUpLink);
-
-        loginForm.setOpacity(0); // Start fully transparent
+        // Add the widgets to the login form
+        loginForm.getChildren().addAll(titleLabel, emailLabel, emailField, passwordLabel, passwordField, loginButton, loadingIndicator, signUpLink);
+        loginForm.setOpacity(0); // Set the opacity to 0 to fade in later
 
         // Add the login form to the Pane
         stackPane.getChildren().add(loginForm);
@@ -124,13 +154,15 @@ public class SignInPage extends Application {
         fadeTransition.play();
 
         // Setting the scene
-        Scene scene = new Scene(stackPane, 700, 600);
+        Scene scene = new Scene(stackPane, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
 
-        primaryStage.setTitle("Login Page with Background");
+        // Render the scene on the stage
+        primaryStage.setTitle("Sign In");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
+    // Check if the email is valid
     private boolean isValidEmail(String email) {
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         Pattern pattern = Pattern.compile(emailRegex);
@@ -145,6 +177,7 @@ public class SignInPage extends Application {
         alert.showAndWait();
     }
 
+    // Load the sign-up page
     private void loadSignUpPage(Stage stage) {
         try {
             SignUpPage signUpPage = new SignUpPage();
@@ -154,19 +187,11 @@ public class SignInPage extends Application {
         }
     }
 
+    // Load the home page
     private void loadHomePage(Stage stage) {
         try {
-            UserPage userPage = new UserPage();
-            userPage.start(stage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadAdminPage(Stage stage) {
-        try {
-            AdminPage adminPage = new AdminPage();
-            adminPage.start(stage);
+            HomePage homePage = new HomePage();
+            homePage.start(stage);
         } catch (Exception e) {
             e.printStackTrace();
         }

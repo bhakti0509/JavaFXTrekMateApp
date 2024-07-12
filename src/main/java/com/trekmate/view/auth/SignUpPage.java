@@ -12,6 +12,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -83,7 +84,7 @@ public class SignUpPage extends Application {
         fadeTransition.play();
 
         // Setting the scene
-        Scene scene = new Scene(stackPane, 700, 600);
+        Scene scene = new Scene(stackPane, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
         primaryStage.setTitle("Sign Up");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -91,6 +92,7 @@ public class SignUpPage extends Application {
         signUpButton.setOnAction(event -> {
             boolean isValid = true;
 
+            // Validate the fields firstName, lastName, email, username, and password
             if (firstNameField.getText().isEmpty()) {
                 firstNameField.setStyle("-fx-border-color: red;");
                 isValid = false;
@@ -200,6 +202,7 @@ public class SignUpPage extends Application {
         alert.showAndWait();
     }
 
+    // Load the login page
     private void loadLoginPage(Stage stage) {
         try {
             SignInPage signInPage = new SignInPage();
