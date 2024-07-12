@@ -1,6 +1,5 @@
 package com.trekmate;
 
-
 import javafx.application.Application;
 
 public class Main {
