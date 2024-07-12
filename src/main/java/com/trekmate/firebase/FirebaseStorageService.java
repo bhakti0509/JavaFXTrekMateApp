@@ -6,6 +6,8 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,9 +18,11 @@ import java.util.concurrent.ExecutionException;
 public class FirebaseStorageService {
 
     private final Storage storage;
+    private final String bucketName;
 
     public FirebaseStorageService() {
         storage = initializeFirebaseStorage();
+        bucketName = Dotenv.load().get("FIREBASE_BUCKET_NAME");
     }
 
     private Storage initializeFirebaseStorage() {
@@ -34,7 +38,6 @@ public class FirebaseStorageService {
     }
 
     public String uploadImage(File file) throws InterruptedException, ExecutionException, IOException {
-        String bucketName = "social-media-24dc7.appspot.com";
         String blobString = "images/" + UUID.randomUUID() + "-" + file.getName();
 
         BlobId blobId = BlobId.of(bucketName, blobString);

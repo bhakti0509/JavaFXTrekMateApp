@@ -42,6 +42,9 @@ public class Trek {
         this.qrCodeUrl = qrCodeUrl;
     }
 
+    public Trek() {
+    }
+
     // Getters and setters for all fields (generated automatically or manually)
     
     public String getQrCodeUrl() {
