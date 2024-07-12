@@ -16,25 +16,16 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class ChangePassword extends Application {
 
-    private Stage primaryStage;
-
-    public ChangePassword() {}
-
-    public ChangePassword(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-    }
-
     @Override
     public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
 
         // Load the background image
-
         Image backgroundImage = new Image("images/SettingsBg.jpg");
 
         // Create a BackgroundImage
@@ -112,7 +103,7 @@ public class ChangePassword extends Application {
          scaleTransition.play();
  
          // Setting the scene
-         Scene scene = new Scene(pane, 800, 600);
+         Scene scene = new Scene(pane, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
  
         primaryStage.setTitle("TrekMate");
         primaryStage.setScene(scene);

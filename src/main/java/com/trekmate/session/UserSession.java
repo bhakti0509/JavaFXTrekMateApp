@@ -1,6 +1,7 @@
 package com.trekmate.session;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.trekmate.firebase.FirebaseAuthService;
 
 import java.util.Map;
@@ -36,7 +37,7 @@ public class UserSession {
     public Map<String, Object> getUserDetails() {
         String userDetailsJson = preferences.get(USER_DETAILS, null);
         if (userDetailsJson != null) {
-            return gson.fromJson(userDetailsJson, Map.class);
+            return gson.fromJson(userDetailsJson, new TypeToken<Map<String, Object>>(){}.getType());
         }
         return null;
     }
@@ -48,11 +49,7 @@ public class UserSession {
         }
         return false;
     }
-
-    public void clearUserDetails() {
-        preferences.remove(USER_DETAILS);
-    }
-
+    
     public boolean isLoggedIn() {
         return preferences.get(USER_DETAILS, null) != null;
     }
@@ -66,5 +63,9 @@ public class UserSession {
                 saveUserDetails(updatedUserDetails);
             }
         }
+    }
+
+    public void logout() {
+        preferences.remove(USER_DETAILS);
     }
 }
