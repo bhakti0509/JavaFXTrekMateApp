@@ -24,7 +24,7 @@ public class FirestoreConfig {
         try {
             FileInputStream serviceAccount = new FileInputStream("firebase.json");
 
-            FirebaseOptions options = new FirebaseOptions.Builder()
+            FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
 

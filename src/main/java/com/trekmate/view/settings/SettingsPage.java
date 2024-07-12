@@ -9,6 +9,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class SettingsPage extends Application {
@@ -18,30 +19,8 @@ public class SettingsPage extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        primaryStage.setTitle("Settings Page Example");
+        primaryStage.setTitle("Settings");
 
-        // Load the settings icon
-        Image settingsImage = new Image(getClass().getResourceAsStream("/images/settingsLogo.jpg"));
-        ImageView settingsImageView = new ImageView(settingsImage);
-        settingsImageView.setFitWidth(30);
-        settingsImageView.setFitHeight(30);
-
-        Button btn = new Button();
-        btn.setText(""); // Add some text to go along with the icon
-        btn.setGraphic(settingsImageView); // Set the icon as the graphic
-
-        btn.setOnAction(event -> openSettings());
-
-        StackPane root = new StackPane();
-        root.getChildren().add(btn);
-
-        StackPane.setAlignment(btn, Pos.TOP_LEFT);
-
-        primaryStage.setScene(new Scene(root, 700, 650));
-        primaryStage.show();
-    }
-
-    private void openSettings() {
         GridPane grid = new GridPane();
         grid.setVgap(20);
         grid.setHgap(10);
@@ -132,20 +111,6 @@ public class SettingsPage extends Application {
 
         grid.add(aboutButton, 1, 4);
 
-        // Load arrow icon
-        Image arrowImage = new Image(getClass().getResourceAsStream("/images/BackButtonLogo.jpg"));
-        ImageView arrowImageView = new ImageView(arrowImage);
-        arrowImageView.setFitWidth(15);
-        arrowImageView.setFitHeight(15);
-
-        // Back button
-        Button backButton = new Button("Back", arrowImageView);
-        backButton.setOnAction(event -> backToMain());
-        backButton.setAlignment(Pos.CENTER); // Center the button
-        GridPane.setHalignment(backButton, javafx.geometry.HPos.CENTER); // Center horizontally in cell
-
-        grid.add(backButton, 1, 5);
-
         // Set background image
         Image backgroundImage = new Image(getClass().getResourceAsStream("/images/SettingsBg.jpg"));
         BackgroundImage bgImage = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT,
@@ -154,7 +119,7 @@ public class SettingsPage extends Application {
         Background background = new Background(bgImage);
         grid.setBackground(background);
 
-        Scene settingsScene = new Scene(grid, 700, 650);
+        Scene settingsScene = new Scene(grid, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
         primaryStage.setScene(settingsScene);
     }
 
@@ -177,7 +142,6 @@ public class SettingsPage extends Application {
         arrowImageView.setFitHeight(15);
 
         Button backButton = new Button("Back", arrowImageView);
-        backButton.setOnAction(event -> backToSettings());
 
         vbox.getChildren().addAll(termsLabel, backButton);
 
@@ -198,20 +162,12 @@ public class SettingsPage extends Application {
         arrowImageView.setFitHeight(15);
 
         Button backButton = new Button("Back", arrowImageView);
-        backButton.setOnAction(event -> backToSettings());
+    
 
         vbox.getChildren().addAll(aboutLabel, backButton);
 
         Scene aboutScene = new Scene(vbox, 700, 600);
         primaryStage.setScene(aboutScene);
-    }
-
-    private void backToSettings() {
-        openSettings();
-    }
-
-    private void backToMain() {
-        start(primaryStage);
     }
 
     public static void main(String[] args) {

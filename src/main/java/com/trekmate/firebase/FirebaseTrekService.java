@@ -22,7 +22,7 @@ public class FirebaseTrekService {
             data.put("fortName", trek.getFortName());
             data.put("description", trek.getDescription());
             data.put("location", trek.getLocation());
-            data.put("owner", trek.getOwner());
+            data.put("contact", trek.getContact());
             data.put("trekDuration", trek.getTrekDuration());
             data.put("difficultyLevel", trek.getDifficultyLevel());
             data.put("openingTime", trek.getOpeningTime());

@@ -1,0 +1,11 @@
+.label {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-family: "Arial";
+}
+
+#heading {
+    -fx-font-size: 24px;
+    -fx-font-family: "Arial Black";
+    -fx-text-fill: white;
+}
