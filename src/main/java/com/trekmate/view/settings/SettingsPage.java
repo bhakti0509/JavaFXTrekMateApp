@@ -1,7 +1,5 @@
 package com.trekmate.view.settings;
 
-import com.trekmate.view.components.NavBar;
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,17 +9,22 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
-import javafx.stage.Screen;
+// import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class SettingsPage extends Application {
 
     private Stage primaryStage;
+    private Scene settingsScene; // Store the settings scene reference
 
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        primaryStage.setTitle("Settings");
+        primaryStage.setTitle("TrekMate");
+       // primaryStage.setHeight(1080);
+        //primaryStage.setWidth(2080);
+
+        // Remove the settings icon
 
         GridPane grid = new GridPane();
         grid.setVgap(20);
@@ -71,7 +74,6 @@ public class SettingsPage extends Application {
         Image changePasswordImage = new Image(getClass().getResourceAsStream("/images/LockLogo.jpg"));
         ImageView changePasswordImageView = new ImageView(changePasswordImage);
         changePasswordImageView.setFitWidth(40);
-
         changePasswordImageView.setFitHeight(40);
         grid.add(changePasswordImageView, 0, 2);
 
@@ -113,6 +115,21 @@ public class SettingsPage extends Application {
 
         grid.add(aboutButton, 1, 4);
 
+        // Load arrow icon
+        Image arrowImage = new Image(getClass().getResourceAsStream("/images/BackButtonLogo.jpg"));
+        ImageView arrowImageView = new ImageView(arrowImage);
+        arrowImageView.setFitWidth(15);
+        arrowImageView.setFitHeight(15);
+
+        // Back button
+        Button backButton = new Button("Back", arrowImageView);
+        // backButton.setOnAction(event -> backToMain()); // Go back to main scene
+        backButton.setOnAction(event -> primaryStage.setScene(settingsScene));
+        backButton.setAlignment(Pos.CENTER); // Center the button
+        GridPane.setHalignment(backButton, javafx.geometry.HPos.CENTER); // Center horizontally in cell
+
+        grid.add(backButton, 1, 5);
+
         // Set background image
         Image backgroundImage = new Image(getClass().getResourceAsStream("/images/SettingsBg.jpg"));
         BackgroundImage bgImage = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT,
@@ -121,17 +138,12 @@ public class SettingsPage extends Application {
         Background background = new Background(bgImage);
         grid.setBackground(background);
 
-        VBox layout = new VBox();
-        NavBar navBarComponent = new NavBar(primaryStage);
-
-        layout.getChildren().addAll(navBarComponent.createNavBar(), grid);
-
-        Scene settingsScene = new Scene(layout, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+        settingsScene = new Scene(grid, 2080, 1080);
         primaryStage.setScene(settingsScene);
     }
 
     private void openChangePasswordWindow() {
-        // Launch the NewPassword scene
+        // Launch the ChangePassword scene
         ChangePassword newPassword = new ChangePassword();
         newPassword.start(primaryStage);
     }
@@ -149,35 +161,51 @@ public class SettingsPage extends Application {
         arrowImageView.setFitHeight(15);
 
         Button backButton = new Button("Back", arrowImageView);
+        backButton.setOnAction(event -> backToMain()); // Go back to main scene
 
         vbox.getChildren().addAll(termsLabel, backButton);
 
-        Scene termsScene = new Scene(vbox, 700, 600);
+        Scene termsScene = new Scene(vbox, 2080, 1080);
         primaryStage.setScene(termsScene);
     }
 
     private void showAboutUs() {
-        VBox vbox = new VBox(10);
-        vbox.setPadding(new Insets(10, 10, 10, 10));
+        VBox vbox = new VBox(20); // Increased spacing to ensure elements are properly separated
+        vbox.setPadding(new Insets(50, 50, 50, 50)); // Increased padding to avoid elements touching edges
         vbox.setAlignment(Pos.CENTER); // Center the VBox
-        Label aboutLabel = new Label("About Us content goes here...");
+
+        Label aboutLabel = new Label("About Us");
+        aboutLabel.setFont(new Font(20));
+        Label groupNameLabel = new Label("Group Name: Bug Optimizers");
+        Label membersLabel = new Label("Group Members:\n- Bhakti Satpute\n- Sarita Disale");
+        Label conceptsLabel = new Label(
+                "Concepts Used:\n- Inheritance\n- Polymorphism\n- Abstraction\n- Interface\n- Exception Handling\n- JavaFX\n- Maven\n- MVC Pattern\n- Firestore");
 
         // Load arrow icon
-        Image arrowImage = new Image(getClass().getResourceAsStream("/images/BackButtonLogo.png"));
+        Image arrowImage = new Image(getClass().getResourceAsStream("/images/BackButtonLogo.jpg"));
         ImageView arrowImageView = new ImageView(arrowImage);
         arrowImageView.setFitWidth(15);
         arrowImageView.setFitHeight(15);
 
         Button backButton = new Button("Back", arrowImageView);
-    
+        backButton.setOnAction(event -> primaryStage.setScene(settingsScene)); // Set back button action to switch back
+                                                                               // to settings page
 
-        vbox.getChildren().addAll(aboutLabel, backButton);
+        // Set background image for the about page
+        Image aboutBackgroundImage = new Image(getClass().getResourceAsStream("/images/ProfPageBg.jpg"));
+        BackgroundImage aboutBgImage = new BackgroundImage(aboutBackgroundImage, BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                new BackgroundSize(0, 0, true, true, true, true));
+        Background aboutBackground = new Background(aboutBgImage);
+        vbox.setBackground(aboutBackground);
 
-        Scene aboutScene = new Scene(vbox, 700, 600);
+        vbox.getChildren().addAll(aboutLabel, groupNameLabel, membersLabel, conceptsLabel, backButton);
+
+        Scene aboutScene = new Scene(vbox, 2080, 1080); // Adjust size as needed
         primaryStage.setScene(aboutScene);
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    private void backToMain() {
+            primaryStage.setScene(settingsScene); // Go back to main scene
     }
 }
