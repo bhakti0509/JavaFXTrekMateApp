@@ -1,11 +1,11 @@
 package com.trekmate.view.auth;
 
-import com.trekmate.firebase.FirebaseAuthService;
+import com.trekmate.controller.AuthController;
+import com.trekmate.manager.SceneManager;
+import com.trekmate.model.User;
 import com.trekmate.session.UserSession;
-import com.trekmate.view.homePage.HomePage;
 
 import javafx.animation.FadeTransition;
-import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,21 +17,19 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.util.Map;
 import java.util.regex.Pattern;
 
-public class SignInPage extends Application {
+public class SignInPage {
 
-    private FirebaseAuthService firebaseAuthService;
-    private UserSession userSession;
+    private final AuthController authController;
+    private final SceneManager sceneManager;
 
-    public SignInPage() {
-        this.firebaseAuthService = new FirebaseAuthService();
-        this.userSession = new UserSession();
+    public SignInPage(SceneManager sceneManager) {
+        this.authController = new AuthController();
+        this.sceneManager = sceneManager;
     }
 
-    @Override
-    public void start(Stage primaryStage) {
+    public Scene getScene() {
         // Load the background image
         Image backgroundImage = new Image("images/RajgadFort.jpg");
 
@@ -98,17 +96,20 @@ public class SignInPage extends Application {
 
             if (isValid) {
                 // Show loading indicator
-                ProgressIndicator progressIndicator = new ProgressIndicator();
-                stackPane.getChildren().add(progressIndicator);
+                loadingIndicator.setVisible(true);
 
                 Task<Void> task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
                         // Sign in the user
-                        Map<String, Object> userData = firebaseAuthService.signIn(emailField.getText(), passwordField.getText());
+                        User user = authController.signIn(emailField.getText(), passwordField.getText());
 
-                        // Save the user details in the session
-                        userSession.saveUserDetails(userData);
+                        if (user != null) {
+                            // Save the user details in the session
+                            UserSession.saveUserDetails(user);
+                        } else {
+                            throw new IllegalArgumentException("Invalid email or password.");
+                        }
                         return null;
                     }
 
@@ -116,15 +117,19 @@ public class SignInPage extends Application {
                     protected void succeeded() {
                         super.succeeded();
                         // Hide the loading indicator
-                        progressIndicator.setVisible(false);
-                        loadHomePage(primaryStage);
+                        loadingIndicator.setVisible(false);
+                        // get stage 
+                        Stage stage = (Stage) loginButton.getScene().getWindow();
+
+                        sceneManager.addOrUpdateScenes(stage); // Refresh the scene to update the user details
+                        sceneManager.switchTo("HomePage");
                     }
 
                     @Override
                     protected void failed() {
                         super.failed();
                         // Hide the loading indicator
-                        progressIndicator.setVisible(false);
+                        loadingIndicator.setVisible(false);
                         showAlert(Alert.AlertType.ERROR, "Login Failed", "Invalid email or password.");
                     }
                 };
@@ -139,7 +144,7 @@ public class SignInPage extends Application {
         // Create a sign-up link to navigate to the sign-up page
         Label signUpLink = new Label("Don't have an account? Sign up!");
         signUpLink.setStyle("-fx-text-fill: blue; -fx-underline: true; -fx-cursor: hand;");
-        signUpLink.setOnMouseClicked(event -> loadSignUpPage(primaryStage));
+        signUpLink.setOnMouseClicked(event -> sceneManager.switchTo("SignUpPage"));
 
         // Add the widgets to the login form
         loginForm.getChildren().addAll(titleLabel, emailLabel, emailField, passwordLabel, passwordField, loginButton, loadingIndicator, signUpLink);
@@ -154,12 +159,7 @@ public class SignInPage extends Application {
         fadeTransition.play();
 
         // Setting the scene
-        Scene scene = new Scene(stackPane, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
-
-        // Render the scene on the stage
-        primaryStage.setTitle("Sign In");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        return new Scene(stackPane, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
     }
 
     // Check if the email is valid
@@ -175,29 +175,5 @@ public class SignInPage extends Application {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    // Load the sign-up page
-    private void loadSignUpPage(Stage stage) {
-        try {
-            SignUpPage signUpPage = new SignUpPage();
-            signUpPage.start(stage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Load the home page
-    private void loadHomePage(Stage stage) {
-        try {
-            HomePage homePage = new HomePage();
-            homePage.start(stage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

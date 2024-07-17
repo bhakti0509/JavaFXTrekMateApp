@@ -1,4 +1,9 @@
 package com.trekmate.view.settings;
+
+import com.trekmate.manager.SceneManager;
+import com.trekmate.model.User;
+import com.trekmate.session.UserSession;
+import com.trekmate.view.components.NavBar;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,68 +16,75 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.File;
 
-import com.trekmate.view.homePage.HomePage;
+public class ProfilePage {
 
-public class ProfilePage{
-
-    private TextField nameField;
+    private TextField firstNameField;
+    private TextField lastNameField;
     private TextField usernameField;
     private TextField emailField;
     private TextField mobileField;
     private TextField addressField;
     private ImageView profileImageView;
-    private ImageView vehicleImageView;
     private Button editButton;
     private Button saveButton;
     private Button uploadProfilePhotoButton;
-    private Button backButton;
     private Circle vehicleCircle;
-    
+    private SceneManager sceneManager;
 
-    public void start(Stage primaryStage) {
+    public ProfilePage(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
+    }
+
+    public Scene createScene() {
+        // Fetch user details from session
+        User user = UserSession.getUserDetails();
+
         // Create the profile picture
-        Image profileImage = new Image("file:profile_picture.png");
-        profileImageView = new ImageView(profileImage);
-        profileImageView.setFitWidth(100);
-        profileImageView.setFitHeight(100);
-
-        // Create the vehicle picture with a circular shape
-        vehicleImageView = new ImageView();
-        vehicleImageView.setFitWidth(150);
-        vehicleImageView.setFitHeight(150);
+        if (user != null && user.getProfilePictureUrl() != null && !user.getProfilePictureUrl().isEmpty()) {
+            profileImageView = new ImageView(new Image(user.getProfilePictureUrl()));
+        } else {
+            profileImageView = new ImageView(new Image("/images/avatar.png")); // Default avatar image
+        }
+        profileImageView.setFitWidth(150);
+        profileImageView.setFitHeight(150);
 
         vehicleCircle = new Circle(75, 75, 75);
         vehicleCircle.setStroke(Color.BLACK);
         vehicleCircle.setFill(Color.LIGHTGRAY);
-        vehicleImageView.setClip(vehicleCircle);
+        profileImageView.setClip(vehicleCircle);
 
-        // Create a button to upload a profile photo of an user
+        // Create a button to upload a profile photo of a user
         uploadProfilePhotoButton = new Button("Upload Photo");
         uploadProfilePhotoButton.setStyle("-fx-font-size: 14px;");
-        uploadProfilePhotoButton.setOnAction(e -> uploadProfilePhoto(primaryStage));
+        uploadProfilePhotoButton.setOnAction(e -> uploadProfilePhoto());
 
         // Create text fields for user details
-        nameField = new TextField("");
-        nameField.setPromptText("Enter your name");
-        nameField.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        firstNameField = new TextField(user != null ? user.getFirstName() : "");
+        firstNameField.setPromptText("Enter your first name");
+        firstNameField.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
-        usernameField = new TextField("");
+        lastNameField = new TextField(user != null ? user.getLastName() : "");
+        lastNameField.setPromptText("Enter your last name");
+        lastNameField.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+        usernameField = new TextField(user != null ? user.getUsername() : "");
         usernameField.setPromptText("Enter your username");
         usernameField.setStyle("-fx-font-size: 16px;-fx-font-weight: bold;");
 
-        emailField = new TextField("");
+        emailField = new TextField(user != null ? user.getEmail() : "");
         emailField.setPromptText("Enter your email");
         emailField.setStyle("-fx-font-size: 16px;-fx-font-weight: bold;");
 
-        mobileField = new TextField("");
+        mobileField = new TextField(user != null ? user.getMobileNo() : "");
         mobileField.setPromptText("Enter your mobile number");
         mobileField.setStyle("-fx-font-size: 16px;-fx-font-weight: bold;");
 
-        addressField = new TextField("");
+        addressField = new TextField(user != null ? user.getAddress() : "");
         addressField.setPromptText("Enter your address");
         addressField.setStyle("-fx-font-size: 16px;-fx-font-weight: bold;");
 
@@ -86,40 +98,39 @@ public class ProfilePage{
         saveButton.setOnAction(e -> setEditingMode(false));
         saveButton.setVisible(false);
 
-        // Create a back button
-        backButton = new Button("Back");
-        backButton.setStyle("-fx-font-size: 16px;");
-        backButton.setOnAction(e -> handleBackButton(primaryStage));
-
         // Create a layout for the profile details
-        VBox detailsLayout = new VBox(5);
-        detailsLayout.setAlignment(Pos.CENTER); // Center align all items in detailsLayout
+        VBox detailsLayout = new VBox(10);
+        detailsLayout.setAlignment(Pos.CENTER);
         detailsLayout.getChildren().addAll(
-                vehicleImageView,
+                profileImageView,
                 uploadProfilePhotoButton,
-                new Label("Name:"), nameField,
+                new Label("First Name:"), firstNameField,
+                new Label("Last Name:"), lastNameField,
                 new Label("Username:"), usernameField,
                 new Label("Email:"), emailField,
                 new Label("Mobile No:"), mobileField,
                 new Label("Address:"), addressField,
                 editButton, saveButton);
-        detailsLayout.setPadding(new Insets(10));
-
+        detailsLayout.setPadding(new Insets(10, 30, 10, 30));
+        detailsLayout.setMaxWidth(450); // Limit the width
+        detailsLayout.setStyle("-fx-background-color: rgba(255, 255, 255, 0.7); -fx-border-color: black; -fx-border-width: 2px;"); // Semi-transparent white background
+        
         // Create the main layout
-        HBox mainLayout = new HBox(20);
-        mainLayout.setAlignment(Pos.CENTER); // Center align mainLayout
-        mainLayout.getChildren().addAll(profileImageView, detailsLayout);
+        VBox mainLayout = new VBox(20);
+        mainLayout.setAlignment(Pos.TOP_CENTER);
+        mainLayout.getChildren().addAll(detailsLayout);
         mainLayout.setPadding(new Insets(20));
+        mainLayout.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7); -fx-border-color: black;"); // Semi-transparent black background
+        mainLayout.setMinHeight(Screen.getPrimary().getBounds().getHeight());
+        mainLayout.setMinWidth(Screen.getPrimary().getBounds().getWidth());
 
-        // Create the bottom layout with the back button
-        HBox bottomLayout = new HBox();
-        bottomLayout.setAlignment(Pos.CENTER);
-        bottomLayout.getChildren().add(backButton);
-        bottomLayout.setPadding(new Insets(10));
+        // Add NavBar to the layout
+        NavBar navBar = new NavBar(sceneManager);
+        HBox navBarBox = navBar.createNavBar();
 
         // Create the overall layout
         VBox overallLayout = new VBox();
-        overallLayout.getChildren().addAll(mainLayout, bottomLayout);
+        overallLayout.getChildren().addAll(navBarBox, mainLayout);
 
         // Set background image for the overall layout
         Image backgroundImage = new Image("images/ProfPageBg.jpg");
@@ -132,32 +143,31 @@ public class ProfilePage{
         );
         overallLayout.setBackground(new Background(background));
 
-        // Create the scene and set the stage
-        Scene Profilescene = new Scene(overallLayout,2080,1080);
-        primaryStage.setTitle("TrekMate");
-        primaryStage.setFullScreen(true);
-        primaryStage.setScene(Profilescene);
-        primaryStage.show();
+        // Set editing mode to false
+        setEditingMode(false);
 
-        // Initially set to viewing mode
-        setEditingMode(true);
+        // Create the scene with primary screen bounds
+        Scene profileScene = new Scene(overallLayout, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+        return profileScene;
     }
 
-    private void uploadProfilePhoto(Stage primaryStage) {
+    private void uploadProfilePhoto() {
+        Stage stage = (Stage) uploadProfilePhotoButton.getScene().getWindow();
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose Photo");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", ".png", ".jpg", "*.jpeg")
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
         );
-        File selectedFile = fileChooser.showOpenDialog(primaryStage);
+        File selectedFile = fileChooser.showOpenDialog(stage);
         if (selectedFile != null) {
-            Image vehicleImage = new Image(selectedFile.toURI().toString());
-            vehicleImageView.setImage(vehicleImage);
+            Image profileImage = new Image(selectedFile.toURI().toString());
+            profileImageView.setImage(profileImage);
         }
     }
 
     private void setEditingMode(boolean isEditing) {
-        nameField.setEditable(isEditing);
+        firstNameField.setEditable(isEditing);
+        lastNameField.setEditable(isEditing);
         usernameField.setEditable(isEditing);
         emailField.setEditable(isEditing);
         mobileField.setEditable(isEditing);
@@ -165,15 +175,5 @@ public class ProfilePage{
         editButton.setVisible(!isEditing);
         saveButton.setVisible(isEditing);
         uploadProfilePhotoButton.setVisible(isEditing);
-    }
-
-    private void handleBackButton(Stage primaryStage) {
-        HomePage homePage = new HomePage();
-        try {
-            homePage.start(primaryStage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        backButton.setStyle("-fx-font-size: 14px; -fx-background-color: #ff0000; -fx-text-fill: white;"); // Change color to red
     }
 }

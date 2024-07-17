@@ -1,6 +1,11 @@
 package com.trekmate.view.trek;
 
-import javafx.application.Application;
+import com.trekmate.firebase.FirebaseStorageService;
+import com.trekmate.firebase.FirebaseTrekService;
+import com.trekmate.manager.SceneManager;
+import com.trekmate.model.Trek;
+import com.trekmate.view.components.NavBar;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,10 +16,6 @@ import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import com.trekmate.firebase.FirebaseTrekService;
-import com.trekmate.firebase.FirebaseStorageService;
-import com.trekmate.model.Trek;
-import com.trekmate.view.components.NavBar;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class AddTrekPage extends Application {
+public class AddTrekPage {
 
     private List<File> primaryImageFile = new ArrayList<>();
     private List<File> secondaryImageFiles = new ArrayList<>();
@@ -40,21 +41,34 @@ public class AddTrekPage extends Application {
     private TextField cost;
 
     private ImageView primaryImageView;
-    private VBox secondaryImageBox;
+    private HBox secondaryImageBox;
     private ImageView qrCodeImageView;
 
-    public static void main(String[] args) {
-        launch(args);
+    private ProgressIndicator progressIndicator;
+    private Label progressLabel;
+
+    private SceneManager sceneManager;
+    private FirebaseStorageService firebaseStorageService;
+    private FirebaseTrekService firebaseTrekService;
+
+    public AddTrekPage(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
+        this.firebaseStorageService = new FirebaseStorageService();
+        this.firebaseTrekService = new FirebaseTrekService();
     }
 
-    @Override
-    public void start(Stage primaryStage) {
-        primaryStage.setTitle("Admin Page");
-
-        GridPane gridPane = createFormGridPane(primaryStage);
+    public Scene createScene() {
+        initializeFields();
+        GridPane gridPane = setupGridPane();
+        addFormFieldsToGrid(gridPane);
+        setupPrimaryImageSection(gridPane);
+        setupSecondaryImageSection(gridPane);
+        setupQRCodeSection(gridPane);
+        setupSaveButton(gridPane);
+    
         VBox container = createContainer(gridPane);
 
-        NavBar navBarComponent = new NavBar(primaryStage);
+        NavBar navBarComponent = new NavBar(sceneManager);
         VBox layout = new VBox(20);
         layout.getChildren().addAll(navBarComponent.createNavBar(), container);
         layout.setAlignment(Pos.TOP_CENTER);
@@ -66,22 +80,9 @@ public class AddTrekPage extends Application {
         Scene scene = new Scene(root, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
         scene.getStylesheets().add(getClass().getResource("/trekForm.css").toExternalForm());
 
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        return scene;
     }
-
-    private GridPane createFormGridPane(Stage primaryStage) {
-        initializeFields();
-        GridPane gridPane = setupGridPane();
-        addFormFieldsToGrid(gridPane);
-        setupPrimaryImageSection(primaryStage, gridPane);
-        setupSecondaryImageSection(primaryStage, gridPane);
-        setupQRCodeSection(primaryStage, gridPane);
-        setupSaveButton(gridPane);
-
-        return gridPane;
-    }
-
+    
     private void initializeFields() {
         fortName = createTextField("Enter Fort Name", "This field is necessary");
         description = createTextField("Description", "This field is necessary");
@@ -107,6 +108,12 @@ public class AddTrekPage extends Application {
         qrCodeImageView = new ImageView();
         qrCodeImageView.setFitWidth(100);
         qrCodeImageView.setFitHeight(100);
+
+        progressIndicator = new ProgressIndicator();
+        progressIndicator.setVisible(false);
+
+        progressLabel = new Label();
+        progressLabel.setVisible(false);
     }
 
     private TextField createTextField(String promptText, String tooltipText) {
@@ -154,33 +161,34 @@ public class AddTrekPage extends Application {
         gridPane.add(cost, 1, 8);
     }
 
-    private void setupPrimaryImageSection(Stage primaryStage, GridPane gridPane) {
-        Button addPrimaryImageButton = createButton("Add Poster Image", primaryStage, primaryImageFile, primaryImageView);
+    private void setupPrimaryImageSection(GridPane gridPane) {
+        Button addPrimaryImageButton = createSelectImageButton("Add Poster Image", primaryImageFile, primaryImageView);
         HBox primaryImageBox = new HBox(10, addPrimaryImageButton, primaryImageView);
         gridPane.add(new Label("Primary Image*:"), 0, 9);
         gridPane.add(primaryImageBox, 1, 9);
     }
 
-    private void setupSecondaryImageSection(Stage primaryStage, GridPane gridPane) {
-        secondaryImageBox = new VBox(10);
-        Button addSecondaryImagesButton = createButton("Add trek Images", primaryStage, secondaryImageFiles, secondaryImageBox);
+    private void setupSecondaryImageSection(GridPane gridPane) {
+        secondaryImageBox = new HBox(10);
+        Button addSecondaryImagesButton = createSelectImageButton("Add trek Images", secondaryImageFiles, secondaryImageBox);
         gridPane.add(new Label("Secondary Images:"), 0, 10);
         gridPane.add(addSecondaryImagesButton, 1, 10);
         gridPane.add(secondaryImageBox, 1, 11);
     }
 
-    private void setupQRCodeSection(Stage primaryStage, GridPane gridPane) {
-        Button addQRCodeButton = createButton("Add Payment QR Code", primaryStage, qrCodeFile, qrCodeImageView);
+    private void setupQRCodeSection(GridPane gridPane) {
+        Button addQRCodeButton = createButton("Add Payment QR Code", qrCodeFile, qrCodeImageView);
         HBox qrCodeBox = new HBox(10, addQRCodeButton, qrCodeImageView);
         gridPane.add(new Label("Payment QR Code*:"), 0, 12);
         gridPane.add(qrCodeBox, 1, 12);
     }
 
-    private Button createButton(String buttonText, Stage primaryStage, List<File> imageFiles, ImageView imageView) {
+    private Button createSelectImageButton(String buttonText, List<File> imageFiles, ImageView imageView) {
         Button button = new Button(buttonText);
         button.setPadding(new Insets(10));
         button.setOnAction(e -> {
-            File selectedFile = showFileChooser(primaryStage, buttonText);
+            Stage stage = (Stage) button.getScene().getWindow();
+            File selectedFile = showFileChooser(stage, buttonText);
             if (selectedFile != null) {
                 Image image = new Image(selectedFile.toURI().toString());
                 imageFiles.clear();
@@ -191,11 +199,12 @@ public class AddTrekPage extends Application {
         return button;
     }
 
-    private Button createButton(String buttonText, Stage primaryStage, List<File> imageFiles, VBox imageBox) {
+    private Button createSelectImageButton(String buttonText, List<File> imageFiles, HBox imageBox) {
         Button button = new Button(buttonText);
         button.setPadding(new Insets(10));
         button.setOnAction(e -> {
-            List<File> selectedFiles = showFileChooserForMultipleFiles(primaryStage, buttonText);
+            Stage stage = (Stage) button.getScene().getWindow();
+            List<File> selectedFiles = showFileChooserForMultipleFiles(stage, buttonText);
             if (selectedFiles != null) {
                 imageFiles.addAll(selectedFiles);
                 imageBox.getChildren().clear();
@@ -210,11 +219,12 @@ public class AddTrekPage extends Application {
         return button;
     }
 
-    private Button createButton(String buttonText, Stage primaryStage, File qrCodeFile, ImageView qrCodeImageView) {
+    private Button createButton(String buttonText, File qrCodeFile, ImageView qrCodeImageView) {
         Button button = new Button(buttonText);
         button.setPadding(new Insets(10));
         button.setOnAction(e -> {
-            File selectedFile = showFileChooser(primaryStage, buttonText);
+            Stage stage = (Stage) button.getScene().getWindow();
+            File selectedFile = showFileChooser(stage, buttonText);
             if (selectedFile != null) {
                 Image image = new Image(selectedFile.toURI().toString());
                 this.qrCodeFile = selectedFile;
@@ -246,7 +256,10 @@ public class AddTrekPage extends Application {
         Button saveButton = new Button("Save");
         saveButton.setPadding(new Insets(10));
         saveButton.setOnAction(e -> saveTrekDetails());
-        gridPane.add(saveButton, 0, 13);
+        HBox saveButtonBox = new HBox(saveButton, progressIndicator, progressLabel);
+        saveButtonBox.setSpacing(10);
+        saveButtonBox.setAlignment(Pos.CENTER);
+        gridPane.add(saveButtonBox, 0, 13, 2, 1);
     }
 
     private VBox createContainer(GridPane gridPane) {
@@ -261,84 +274,80 @@ public class AddTrekPage extends Application {
     }
 
     private void saveTrekDetails() {
-        if (fortName.getText().isEmpty() || description.getText().isEmpty() || fortLocation.getText().isEmpty()
-                || contact.getText().isEmpty() || primaryImageFile.isEmpty() || qrCodeFile == null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Please fill in all necessary fields", ButtonType.OK);
-            alert.showAndWait();
+        // Check required fields
+        if (isInvalidInput()) {
+            showAlert(Alert.AlertType.ERROR, "Please fill in all required fields.");
             return;
         }
 
-        try {
-            FirebaseStorageService storageService = new FirebaseStorageService();
-            List<String> imageUrls = uploadImages(storageService);
-            String qrCodeUrl = uploadQRCode(storageService);
+        // Show progress indicators
+        progressIndicator.setVisible(true);
+        progressLabel.setText("Uploading images...");
+        progressLabel.setVisible(true);
 
-            Trek trek = createTrek(imageUrls, qrCodeUrl);
-            saveTrekToFirebase(trek);
-            clearAllFields();
-        } catch (InterruptedException | ExecutionException | IOException ex) {
-            ex.printStackTrace();
-            showErrorAlert("Error saving trip details.");
-        }
+        Task<Void> uploadTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                try {
+                    // Upload images and get URLs
+                    List<String> imageUrls = new ArrayList<>();
+                    imageUrls.add(uploadImage(primaryImageFile.get(0)));
+                    for (File imageFile : secondaryImageFiles) {
+                        imageUrls.add(uploadImage(imageFile));
+                    }
+                    String qrCodeUrl = uploadImage(qrCodeFile);
+
+                    // Add trek details to Firestore
+                    Trek trek = new Trek(fortName.getText(), description.getText(), fortLocation.getText(),
+                            contact.getText(),trekDuration.getText(), difficultyLevel.getText(), openingTime.getText(),
+                            closingTime.getText(), duration.getText(), cost.getText(), imageUrls, 0, 0, null, qrCodeUrl);
+
+
+                    firebaseTrekService.addTrek(trek);
+                } catch (IOException | ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                super.succeeded();
+                progressIndicator.setVisible(false);
+                progressLabel.setVisible(false);
+                showAlert(Alert.AlertType.INFORMATION, "Trek details saved successfully.");
+                clearFormFields();
+            }
+
+            @Override
+            protected void failed() {
+                super.failed();
+                progressIndicator.setVisible(false);
+                progressLabel.setVisible(false);
+                showAlert(Alert.AlertType.ERROR, "Failed to save trek details. Please try again.");
+            }
+        };
+
+        new Thread(uploadTask).start();
     }
 
-    private List<String> uploadImages(FirebaseStorageService storageService) throws InterruptedException, ExecutionException, IOException {
-        List<String> imageUrls = new ArrayList<>();
-        if (!primaryImageFile.isEmpty()) {
-            imageUrls.add(storageService.uploadImage(primaryImageFile.get(0)));
-        }
-        for (File file : secondaryImageFiles) {
-            imageUrls.add(storageService.uploadImage(file));
-        }
-        return imageUrls;
+    private boolean isInvalidInput() {
+        return fortName.getText().isEmpty() || description.getText().isEmpty() ||
+                fortLocation.getText().isEmpty() || contact.getText().isEmpty() ||
+                primaryImageFile.isEmpty() || qrCodeFile == null;
     }
 
-    private String uploadQRCode(FirebaseStorageService storageService) throws InterruptedException, ExecutionException, IOException {
-        return qrCodeFile != null ? storageService.uploadImage(qrCodeFile) : "";
-    }
-
-    private Trek createTrek(List<String> imageUrls, String qrCodeUrl) {
-        String name = fortName.getText();
-        String desc = description.getText();
-        String location = fortLocation.getText();
-        String trekContact = contact.getText();
-        String trekDur = trekDuration.getText();
-        String difficulty = difficultyLevel.getText();
-        String openTime = openingTime.getText();
-        String closeTime = closingTime.getText();
-        String trekDurationText = duration.getText();
-        String trekCost = cost.getText();
-
-        List<String> bookings = new ArrayList<>(); // Assuming bookings are empty initially
-
-        Trek trek = new Trek(name, desc, location, trekContact, trekDur, difficulty, openTime, closeTime, trekDurationText, trekCost, imageUrls, 0, 0, bookings, qrCodeUrl);
-        trek.setQrCodeUrl(qrCodeUrl);
-
-        return trek;
-    }
-
-    private void saveTrekToFirebase(Trek trek) throws InterruptedException, ExecutionException {
-        FirebaseTrekService trekService = new FirebaseTrekService();
-        trekService.addTrip(trek);
-        showConfirmationAlert("Trip details saved successfully.");
-    }
-
-    private void showErrorAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+    private void showAlert(Alert.AlertType alertType, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 
-    private void showConfirmationAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK);
-        alert.showAndWait();
-    }
-
-    private void clearAllFields() {
+    private void clearFormFields() {
         fortName.clear();
         description.clear();
         fortLocation.clear();
         contact.clear();
-        trekDuration.clear();
         difficultyLevel.clear();
         openingTime.clear();
         closingTime.clear();
@@ -350,5 +359,9 @@ public class AddTrekPage extends Application {
         secondaryImageBox.getChildren().clear();
         qrCodeFile = null;
         qrCodeImageView.setImage(null);
+    }
+
+    private String uploadImage(File imageFile) throws IOException, ExecutionException, InterruptedException {
+        return firebaseStorageService.uploadImage(imageFile);
     }
 }

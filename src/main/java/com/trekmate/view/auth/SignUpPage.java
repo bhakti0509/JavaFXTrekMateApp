@@ -1,8 +1,10 @@
 package com.trekmate.view.auth;
 
-import com.trekmate.firebase.FirebaseAuthService;
+import com.trekmate.controller.AuthController;
+import com.trekmate.manager.SceneManager;
+import com.trekmate.model.User;
+
 import javafx.animation.FadeTransition;
-import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,19 +12,23 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Screen;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.regex.Pattern;
 
-public class SignUpPage extends Application {
+public class SignUpPage {
 
-    @Override
-    public void start(Stage primaryStage) {
+    private AuthController authController;
+    private SceneManager sceneManager;
+    private StackPane stackPane;
 
+    public SignUpPage(SceneManager sceneManager) {
+        this.authController = new AuthController();
+        this.sceneManager = sceneManager;
+    }
+
+    public Scene getScene() {
         // Load images
         Image backgroundImage = new Image(getClass().getResource("/images/signUpBg.jpg").toString());
 
@@ -36,7 +42,7 @@ public class SignUpPage extends Application {
         );
 
         // Create the StackPane and set its background
-        StackPane stackPane = new StackPane();
+        this.stackPane = new StackPane();
         stackPane.setBackground(new Background(background));
         stackPane.setPrefSize(700, 600);
 
@@ -51,7 +57,7 @@ public class SignUpPage extends Application {
 
         // Add widgets
         Label titleLabel = new Label("Sign Up");
-        titleLabel.setFont(Font.font("Sans", FontWeight.BOLD, 30)); // Bold font
+        titleLabel.setFont(javafx.scene.text.Font.font("Sans", javafx.scene.text.FontWeight.BOLD, 30)); // Bold font
         titleLabel.setStyle("-fx-text-fill: #333333; -fx-margin-bottom: 10px;"); // Add margin
         titleLabel.setPadding(new Insets(0, 0, 10, 0)); // Padding bottom
 
@@ -66,7 +72,7 @@ public class SignUpPage extends Application {
 
         Label signInLink = new Label("Already have an account? Sign in here.");
         signInLink.setStyle("-fx-text-fill: blue; -fx-underline: true; -fx-cursor: hand;");
-        signInLink.setOnMouseClicked(event -> loadLoginPage(primaryStage));
+        signInLink.setOnMouseClicked(event -> sceneManager.switchTo("SignInPage"));
 
         HBox nameFields = new HBox(20, firstNameField, lastNameField);
         nameFields.setAlignment(Pos.CENTER);
@@ -85,87 +91,94 @@ public class SignUpPage extends Application {
 
         // Setting the scene
         Scene scene = new Scene(stackPane, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
-        primaryStage.setTitle("Sign Up");
-        primaryStage.setScene(scene);
-        primaryStage.show();
 
+        // Handle sign up button action
         signUpButton.setOnAction(event -> {
-            boolean isValid = true;
-
-            // Validate the fields firstName, lastName, email, username, and password
-            if (firstNameField.getText().isEmpty()) {
-                firstNameField.setStyle("-fx-border-color: red;");
-                isValid = false;
-            } else {
-                firstNameField.setStyle(null);
-            }
-
-            if (lastNameField.getText().isEmpty()) {
-                lastNameField.setStyle("-fx-border-color: red;");
-                isValid = false;
-            } else {
-                lastNameField.setStyle(null);
-            }
-
-            if (emailField.getText().isEmpty() || !isValidEmail(emailField.getText())) {
-                emailField.setStyle("-fx-border-color: red;");
-                isValid = false;
-            } else {
-                emailField.setStyle(null);
-            }
-
-            if (usernameField.getText().isEmpty()) {
-                usernameField.setStyle("-fx-border-color: red;");
-                isValid = false;
-            } else {
-                usernameField.setStyle(null);
-            }
-
-            if (passwordField.getText().isEmpty()) {
-                passwordField.setStyle("-fx-border-color: red;");
-                isValid = false;
-            } else {
-                passwordField.setStyle(null);
-            }
+            boolean isValid = validateFields(firstNameField, lastNameField, emailField, usernameField, passwordField);
 
             if (isValid) {
-                // Show loading indicator
-                ProgressIndicator progressIndicator = new ProgressIndicator();
-                stackPane.getChildren().add(progressIndicator);
-
-                Task<Void> signUpTask = new Task<Void>() {
-                    @Override
-                    protected Void call() throws Exception {
-                        String email = emailField.getText();
-                        String username = usernameField.getText();
-                        String password = passwordField.getText();
-                        String firstName = firstNameField.getText();
-                        String lastName = lastNameField.getText();
-
-                        FirebaseAuthService firebaseAuthService = new FirebaseAuthService();
-                        firebaseAuthService.createUser(email, password, username, firstName, lastName, "user");
-                        return null;
-                    }
-
-                    @Override
-                    protected void succeeded() {
-                        stackPane.getChildren().remove(progressIndicator);
-                        loadLoginPage(primaryStage);
-                    }
-
-                    @Override
-                    protected void failed() {
-                        stackPane.getChildren().remove(progressIndicator);
-                        Throwable e = getException();
-                        showAlert(Alert.AlertType.ERROR, "Sign Up Failed", e.getMessage());
-                    }
-                };
-
-                new Thread(signUpTask).start();
+                signUpUser(firstNameField.getText(), lastNameField.getText(), emailField.getText(),
+                        usernameField.getText(), passwordField.getText());
             } else {
                 showAlert(Alert.AlertType.ERROR, "Sign Up Failed", "Please fill in all required fields correctly.");
             }
         });
+
+        return scene;
+    }
+
+    private boolean validateFields(TextField firstNameField, TextField lastNameField, TextField emailField,
+                                   TextField usernameField, PasswordField passwordField) {
+        boolean isValid = true;
+
+        if (firstNameField.getText().isEmpty()) {
+            firstNameField.setStyle("-fx-border-color: red;");
+            isValid = false;
+        } else {
+            firstNameField.setStyle(null);
+        }
+
+        if (lastNameField.getText().isEmpty()) {
+            lastNameField.setStyle("-fx-border-color: red;");
+            isValid = false;
+        } else {
+            lastNameField.setStyle(null);
+        }
+
+        if (emailField.getText().isEmpty() || !isValidEmail(emailField.getText())) {
+            emailField.setStyle("-fx-border-color: red;");
+            isValid = false;
+        } else {
+            emailField.setStyle(null);
+        }
+
+        if (usernameField.getText().isEmpty()) {
+            usernameField.setStyle("-fx-border-color: red;");
+            isValid = false;
+        } else {
+            usernameField.setStyle(null);
+        }
+
+        if (passwordField.getText().isEmpty()) {
+            passwordField.setStyle("-fx-border-color: red;");
+            isValid = false;
+        } else {
+            passwordField.setStyle(null);
+        }
+
+        return isValid;
+    }
+
+    private void signUpUser(String firstName, String lastName, String email, String username, String password) {
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        stackPane.getChildren().add(progressIndicator);
+
+        Task<Void> signUpTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+
+                // Sign up the user
+                User user = createUser(firstName, lastName, email, username, password);
+                authController.signUp(user);
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                stackPane.getChildren().remove(progressIndicator);
+                showAlert(Alert.AlertType.INFORMATION, "Sign Up Successful", "Account created successfully. Please sign in.");
+                sceneManager.switchTo("SignInPage");
+            }
+
+            @Override
+            protected void failed() {
+                stackPane.getChildren().remove(progressIndicator);
+                Throwable e = getException();
+                showAlert(Alert.AlertType.ERROR, "Sign Up Failed", e.getMessage());
+            }
+        };
+
+        new Thread(signUpTask).start();
     }
 
     private boolean isValidEmail(String email) {
@@ -202,17 +215,13 @@ public class SignUpPage extends Application {
         alert.showAndWait();
     }
 
-    // Load the login page
-    private void loadLoginPage(Stage stage) {
-        try {
-            SignInPage signInPage = new SignInPage();
-            signInPage.start(stage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        launch(args);
+    private User createUser(String firstName, String lastName, String email, String username, String password) {
+        User user = new User();
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setUsername(username);
+        user.setPassword(password);
+        return user;
     }
 }

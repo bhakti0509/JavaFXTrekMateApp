@@ -1,80 +1,58 @@
 package com.trekmate.view.components;
 
+import com.trekmate.manager.SceneManager;
+import com.trekmate.model.User;
 import com.trekmate.session.UserSession;
-import com.trekmate.view.auth.SignInPage;
-import com.trekmate.view.homePage.HomePage;
-import com.trekmate.view.settings.SettingsPage;
-import com.trekmate.view.trek.AddTrekPage;
-
 import javafx.geometry.Insets;
-import javafx.geometry.Point3D;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
-import javafx.stage.Stage;
-
-import java.util.Map;
 
 public class NavBar {
 
-    private UserSession userSession = new UserSession();
-    private Stage primaryStage;
+    private SceneManager sceneManager;
 
-    public NavBar(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+    public NavBar(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
     }
 
     public HBox createNavBar() {
         HBox navBar = new HBox(10);
-        navBar.setAlignment(Pos.CENTER_LEFT);
-        navBar.setPrefSize(Screen.getPrimary().getBounds().getWidth(), 60);
+        navBar.setAlignment(Pos.CENTER);
+        navBar.setPrefWidth(Screen.getPrimary().getBounds().getWidth());
         navBar.setStyle("-fx-background-color: #333;");
         navBar.setPadding(new Insets(10));
 
         Text appName = createAppName();
         ImageView logoView = createLogoView();
-        Button homePageButton = createNavButton("Home", 150, this::handleHomePage);
-        Button myBookingsButton = createNavButton("My Bookings", 200, this::handleMyBookings);
-        Button leaderboardButton = createNavButton("Leaderboard", 200, this::handleLeaderboard);
+        Button homePageButton = createNavButton("Home", this::handleHomePage);
+        Button myBookingsButton = createNavButton("My Bookings", this::handleMyBookings);
+        Button leaderboardButton = createNavButton("Leaderboard", this::handleLeaderboard);
 
-        if (userSession.isLoggedIn()) {
-            Map<String, Object> userDetails = userSession.getUserDetails();
-            String firstName = (String) userDetails.get("firstName");
-            String lastName = (String) userDetails.get("lastName");
-            Label userNameLabel = new Label(firstName + " " + lastName);
-            userNameLabel.setStyle("-fx-font-size: 20px;-fx-text-fill: white;-fx-font-weight: bold;");
+        if (UserSession.isLoggedIn()) {
+            User userDetails = UserSession.getUserDetails();
+            String firstName = userDetails.getFirstName();
+            String lastName = userDetails.getLastName();
+            MenuButton profileButton = createDropDownButton(firstName + " " + lastName);
+            Button createTrekButton = createNavButton("Add Trek", this::handleCreateTrek);
 
-            ImageView profileImage = new ImageView(new Image("images/logo.jpg")); // Placeholder image
-            profileImage.setFitHeight(40);
-            profileImage.setFitWidth(40);
-            profileImage.setClip(new javafx.scene.shape.Circle(20, 20, 20));
-
-            Button profileButton = createNavButton("Profile", 150, this::handleProfile);
-            Button settingsButton = createNavButton("Settings", 150, this::handleSettings);
-            Button createTrekButton = createNavButton("Add Trek", 200, this::handleCreateTrek);
-            Button logoutButton = createNavButton("Logout", 150, this::handleLogout);
-
-            HBox userBox = new HBox(10);
-            userBox.setAlignment(Pos.CENTER);
-            userBox.getChildren().addAll(profileImage, userNameLabel);
-
-            navBar.getChildren().addAll(logoView, appName, homePageButton, myBookingsButton, leaderboardButton, profileButton, settingsButton);
-            if (userSession.isAdmin()) {
+            navBar.getChildren().addAll(logoView, appName, homePageButton, myBookingsButton, leaderboardButton);
+            if (UserSession.isAdmin()) {
                 navBar.getChildren().add(createTrekButton);
             }
-            navBar.getChildren().addAll(userBox, logoutButton);
+            navBar.getChildren().add(profileButton);
+            
         } else {
-            Button loginButton = createNavButton("Login", 150, this::handleLogin);
-            Button signUpButton = createNavButton("Sign Up", 150, this::handleSignUp);
-
-            navBar.getChildren().addAll(logoView, appName, myBookingsButton, leaderboardButton, loginButton, signUpButton);
+            Button signUpButton = createNavButton("Sign Up", this::handleSignUp);
+            Button signInButton = createNavButton("Sign In", this::handleSignIn);
+            navBar.getChildren().addAll(logoView, appName, homePageButton, myBookingsButton, leaderboardButton, signUpButton, signInButton);
         }
 
         return navBar;
@@ -82,95 +60,90 @@ public class NavBar {
 
     private Text createAppName() {
         Text appName = new Text("TrekMate");
-        appName.setFill(Color.GREEN);
-        appName.setStyle("-fx-font-size: 40px;-fx-font-weight: Bold;");
-        appName.setRotationAxis(Point3D.ZERO);
-
-        DropShadow dropShadow = new DropShadow();
-        dropShadow.setColor(Color.AQUAMARINE);
-        dropShadow.setOffsetX(5);
-        dropShadow.setOffsetY(5);
-        appName.setEffect(dropShadow);
-
+        appName.setFont(Font.font("Arial", 25));
+        appName.setFill(Color.WHITE);
         return appName;
     }
 
     private ImageView createLogoView() {
-        ImageView logoView = new ImageView(new Image("images/logo.jpg")); // Placeholder image
-        logoView.setFitHeight(60);
-        logoView.setFitWidth(60);
-        logoView.setClip(new javafx.scene.shape.Circle(30, 30, 30));
+        ImageView logoView = new ImageView(new Image("images/logo.png"));
+        logoView.setFitHeight(50);
+        logoView.setFitWidth(50);
         return logoView;
     }
 
-    private Button createNavButton(String text, int width, javafx.event.EventHandler<javafx.event.ActionEvent> handler) {
+    private Button createNavButton(String text, Runnable action) {
         Button button = new Button(text);
-        button.setPrefSize(width, 20);
-        button.setStyle("-fx-font-size: 20px;-fx-background-color: #333;-fx-text-fill: white; -fx-padding: 10;-fx-font-weight: bold;");
-        button.setOnMouseEntered(event -> button.setStyle("-fx-font-size: 20px;-fx-background-color: #777;-fx-text-fill: white; -fx-padding: 10;-fx-font-weight: bold;"));
-        button.setOnMouseExited(event -> button.setStyle("-fx-font-size: 20px;-fx-background-color: #333;-fx-text-fill: white; -fx-padding: 10;-fx-font-weight: bold;"));
-        button.setOnAction(handler);
+        // Set minimum width to ensure text wrapping
+        button.setMinWidth(Region.USE_PREF_SIZE);
+        button.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px;");
+        button.setOnAction(e -> action.run());
+        
+        // Add hover effect
+        button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: #555; -fx-text-fill: white; -fx-font-size: 16px;"));
+        button.setOnMouseExited(e -> button.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px;"));
+        
         return button;
     }
 
-    private void handleMyBookings(javafx.event.ActionEvent event) {
-        // Handle My Bookings button click
-        System.out.println("My Bookings button clicked");
+    private MenuButton createDropDownButton(String name) {
+        Label nameLabel = new Label(name);
+        nameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
+    
+        MenuButton dropDown = new MenuButton("", nameLabel);
+        dropDown.setGraphicTextGap(10);
+        dropDown.setStyle("-fx-background-color: #333;");
+    
+        MenuItem profileItem = new MenuItem("Profile");
+        MenuItem settingsItem = new MenuItem("Settings");
+        MenuItem logoutItem = new MenuItem("Logout");
+    
+        profileItem.setStyle("-fx-text-fill: black; -fx-font-size: 16px;");
+        settingsItem.setStyle("-fx-text-fill: black; -fx-font-size: 16px;");
+        logoutItem.setStyle("-fx-text-fill: black; -fx-font-size: 16px;");
+    
+        profileItem.setOnAction(e -> handleProfile());
+        settingsItem.setOnAction(e -> handleSettings());
+        logoutItem.setOnAction(e -> handleLogout());
+    
+        dropDown.getItems().addAll(profileItem, settingsItem, new SeparatorMenuItem(), logoutItem);
+        return dropDown;
     }
 
-    private void handleLeaderboard(javafx.event.ActionEvent event) {
-        // Handle Leaderboard button click
-        System.out.println("Leaderboard button clicked");
+    private void handleHomePage() {
+        sceneManager.switchTo("HomePage");
     }
 
-    private void handleProfile(javafx.event.ActionEvent event) {
-        // Handle Profile button click
-        System.out.println("Profile button clicked");
+    private void handleMyBookings() {
+        sceneManager.switchTo("MyBookingsPage");
     }
 
-    private void handleSettings(javafx.event.ActionEvent event) {
-        // Handle Settings button click
-        SettingsPage settingsPage = new SettingsPage();
-        settingsPage.start(primaryStage);
+    private void handleLeaderboard() {
+        sceneManager.switchTo("LeaderboardPage");
     }
 
-    private void handleLogin(javafx.event.ActionEvent event) {
-        // Handle Login button click
-        System.out.println("Login button clicked");
+    private void handleProfile() {
+        sceneManager.switchTo("ProfilePage");
     }
 
-    private void handleSignUp(javafx.event.ActionEvent event) {
-        // Handle Sign Up button click
-        System.out.println("Sign Up button clicked");
+    private void handleSettings() {
+        sceneManager.switchTo("SettingsPage");
     }
 
-    private void handleCreateTrek(javafx.event.ActionEvent event) {
-        // Handle Create Trek button click
-        AddTrekPage addTrekPage = new AddTrekPage();
-        addTrekPage.start(primaryStage);
+    private void handleCreateTrek() {
+        sceneManager.switchTo("AddTrekPage");
     }
 
-    private void handleLogout(javafx.event.ActionEvent event) {
-        // Handle Logout button click
-        userSession.logout();
-        System.out.println("User logged out");
-
-        // Redirect to SignInPage
-        SignInPage signInPage = new SignInPage();
-        try {
-            signInPage.start(primaryStage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void handleSignUp() {
+        sceneManager.switchTo("SignUpPage");
     }
 
-    private void handleHomePage(javafx.event.ActionEvent event) {
-        // Handle Home button click
-        HomePage homePage = new HomePage();
-        try{
-            homePage.start(primaryStage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void handleSignIn() {
+        sceneManager.switchTo("SignInPage");
+    }
+
+    private void handleLogout() {
+        UserSession.logout();
+        sceneManager.switchTo("SignInPage");
     }
 }

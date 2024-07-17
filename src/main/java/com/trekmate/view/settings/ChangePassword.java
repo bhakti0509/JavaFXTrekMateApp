@@ -1,45 +1,41 @@
 package com.trekmate.view.settings;
 
-import com.trekmate.MainApp;
+import com.trekmate.manager.SceneManager;
 
-
-import javafx.animation.ScaleTransition;
-import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import javafx.stage.Stage;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import javafx.animation.ScaleTransition;
+import javafx.geometry.Pos;
 
-public class ChangePassword extends Application {
+public class ChangePassword {
 
-    private Stage primaryStage;
+    private SceneManager sceneManager;
 
-    public ChangePassword() {}
-
-    public ChangePassword(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+    public ChangePassword(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
     }
 
-    @Override
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-
+    public Scene createScene() {
         // Load the background image
-
         Image backgroundImage = new Image("images/SettingsBg.jpg");
 
         // Create a BackgroundImage
-        BackgroundImage background = new BackgroundImage(backgroundImage, 
-                BackgroundRepeat.NO_REPEAT, 
-                BackgroundRepeat.NO_REPEAT, 
-                BackgroundPosition.CENTER, 
+        BackgroundImage background = new BackgroundImage(backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
                 new BackgroundSize(800, 600, false, false, true, false));
 
         // Create a Pane and set its background
@@ -50,7 +46,7 @@ public class ChangePassword extends Application {
         // Create the VBox for the new password form
         VBox newPassword = new VBox(15);
         newPassword.setAlignment(Pos.CENTER);
-        newPassword.setPadding(new Insets(50));
+        newPassword.setPadding(new javafx.geometry.Insets(50));
 
         newPassword.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8); -fx-background-radius: 10;");
 
@@ -79,42 +75,36 @@ public class ChangePassword extends Application {
             System.out.println("Change Password clicked");
         });
 
-         // Load arrow icon
-         Image arrowImage = new Image(getClass().getResourceAsStream("/images/BackButtonLogo.jpg"));
-         ImageView arrowImageView = new ImageView(arrowImage);
-         arrowImageView.setFitWidth(15);
-         arrowImageView.setFitHeight(15);
- 
-         // Back button
-         Button backButton = new Button("Back", arrowImageView);
-         backButton.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
-         backButton.setOnAction(event -> {
-             MainApp mainApp = new MainApp();
-             mainApp.start(primaryStage);
-         });
- 
-         newPassword.getChildren().addAll(titleLabel, newPasswordLabel, newPasswordField, confirmPasswordLabel, confirmPasswordField, changePasswordButton, backButton);
- 
-         // Position the VBox in the center of the Pane
-         newPassword.setLayoutX(450); // Adjust to center the form
-         newPassword.setLayoutY(150);
- 
-         // Add the new password form and ImageView to the Pane
-         pane.getChildren().addAll(newPassword);
- 
-         ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(5), newPassword);
-         scaleTransition.setFromX(1.0);
-         scaleTransition.setToX(1.3);
-         scaleTransition.setFromY(1.0);
-         scaleTransition.setToY(1.3);
-         scaleTransition.play();
- 
-         // Setting the scene
-         Scene scene = new Scene(pane, 800, 600);
- 
-        primaryStage.setTitle("TrekMate");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
+        // Load arrow icon
+        Image arrowImage = new Image(getClass().getResourceAsStream("/images/BackButtonLogo.jpg"));
+        ImageView arrowImageView = new ImageView(arrowImage);
+        arrowImageView.setFitWidth(15);
+        arrowImageView.setFitHeight(15);
 
+        // Back button
+        Button backButton = new Button("Back", arrowImageView);
+        backButton.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
+        backButton.setOnAction(event -> {
+            sceneManager.switchTo("HomePage"); 
+        });
+
+        newPassword.getChildren().addAll(titleLabel, newPasswordLabel, newPasswordField, confirmPasswordLabel, confirmPasswordField, changePasswordButton, backButton);
+
+        // Position the VBox in the center of the Pane
+        newPassword.setLayoutX(450); // Adjust to center the form
+        newPassword.setLayoutY(150);
+
+        // Add the new password form and ImageView to the Pane
+        pane.getChildren().addAll(newPassword);
+
+        ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(5), newPassword);
+        scaleTransition.setFromX(1.0);
+        scaleTransition.setToX(1.3);
+        scaleTransition.setFromY(1.0);
+        scaleTransition.setToY(1.3);
+        scaleTransition.play();
+
+        // Setting the scene
+        return new Scene(pane, 800, 600);
+    }
 }

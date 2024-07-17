@@ -18,7 +18,7 @@ public class FirebaseTrekService {
         this.firestore = FirestoreConfig.getFirestore();
     }
 
-    public void addTrip(Trek trek) throws InterruptedException, ExecutionException {
+    public void addTrek(Trek trek) throws InterruptedException, ExecutionException {
         try {
             DocumentReference docRef = firestore.collection("trips").document();
             Map<String, Object> data = new HashMap<>();

@@ -1,55 +1,95 @@
 package com.trekmate.view.homePage;
 
 import com.trekmate.firebase.FirebaseTrekService;
+import com.trekmate.manager.SceneManager;
 import com.trekmate.model.Trek;
 import com.trekmate.view.components.NavBar;
-import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class HomePage extends Application {
+public class HomePage {
 
-    private Stage primaryStage;
     private FirebaseTrekService trekService;
     private GridPane grid;
     private int trekCount = 0;
-    private static final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = 6;
     private Button loadMoreButton;
+    private SceneManager sceneManager;
+    private ProgressIndicator loadingIndicator;
+    private Label loadingLabel;
 
-    @Override
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+    public HomePage(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
         this.trekService = new FirebaseTrekService();
+        this.loadingIndicator = new ProgressIndicator();
+        this.loadingLabel = new Label("Loading Treks...");
+    }
 
-        primaryStage.setTitle("TrekMate");
+    public Scene getScene(Stage primaryStage) {
+        // Load the background image
+        Image backgroundImage = new Image("images/RajgadFort.jpg");
+        BackgroundImage background = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                new BackgroundSize(400, 100, false, false, true, true)
+        );
 
-        Group root = new Group();
-        Scene scene = new Scene(root, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+        // Create the StackPane and set its background
+        StackPane stackPane = new StackPane();
+        stackPane.setBackground(new Background(background));
+        stackPane.setPrefSize(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
 
-        NavBar navBarComponent = new NavBar(this.primaryStage);
+        // Create the VBox layout
         VBox layout = new VBox(20);
-        layout.getChildren().addAll(navBarComponent.createNavBar(), createGrid());
         layout.setAlignment(Pos.TOP_CENTER);
+        layout.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8); -fx-background-radius: 10;");
+        layout.setMinSize(800, 600);
 
-        root.getChildren().addAll(layout);
+        NavBar navBarComponent = new NavBar(sceneManager);
+        layout.getChildren().add(navBarComponent.createNavBar());
 
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        // Add the GridPane for the treks
+        layout.getChildren().add(createGrid());
 
-        loadMoreTreks();
+        // Add loading indicator and label to layout
+        HBox loadingBox = new HBox(10);
+        loadingBox.setAlignment(Pos.CENTER);
+        loadingBox.getChildren().addAll(loadingIndicator, loadingLabel);
+        layout.getChildren().add(loadingBox);
+        loadingIndicator.setVisible(false);
+        loadingLabel.setVisible(false);
+
+        // Add layout to the StackPane
+        stackPane.getChildren().add(layout);
+
+        // Set the scene
+        Scene scene = new Scene(stackPane, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+
+        // Add a listener to the scene property of the stage
+        primaryStage.sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (newScene == scene) {
+                loadTreks(true);
+            }
+        });
+
+        return scene;
     }
 
     private GridPane createGrid() {
@@ -58,27 +98,74 @@ public class HomePage extends Application {
         grid.setVgap(20);
         grid.setHgap(20);
         grid.setAlignment(Pos.TOP_CENTER);
-        
+
         loadMoreButton = new Button("Load More");
-        loadMoreButton.setOnAction(e -> loadMoreTreks());
+        loadMoreButton.setStyle("-fx-font-size: 16px; -fx-background-color: #0066cc; -fx-text-fill: white; -fx-background-radius: 5;");
+        loadMoreButton.setOnAction(e -> loadTreks(false));
 
         return grid;
     }
 
-    private void loadMoreTreks() {
-        try {
-            List<Trek> treks = trekService.getTreks(PAGE_SIZE, trekCount);
-            if (!treks.isEmpty()) {
-                addTrekTiles(treks);
-            } else {
-                loadMoreButton.setDisable(true);
+    private void loadTreks(boolean clearExisting) {
+        // Show loading indicator and label
+        Platform.runLater(() -> {
+            loadingIndicator.setVisible(true);
+            loadingLabel.setVisible(true);
+        });
+
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws ExecutionException, InterruptedException {
+                List<Trek> treks = trekService.getTreks(PAGE_SIZE, trekCount);
+
+                Platform.runLater(() -> {
+                    try {
+                        if (clearExisting) {
+                            grid.getChildren().clear();
+                            trekCount = 0;
+                        }
+
+                        if (!treks.isEmpty()) {
+                            addTrekTiles(treks);
+                        } else {
+                            loadMoreButton.setDisable(true);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error loading treks: " + e.getMessage());
+                    }
+                });
+
+                return null;
             }
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
+
+            @Override
+            protected void succeeded() {
+                super.succeeded();
+                // Hide the loading indicator and label
+                Platform.runLater(() -> {
+                    loadingIndicator.setVisible(false);
+                    loadingLabel.setVisible(false);
+                });
+            }
+
+            @Override
+            protected void failed() {
+                super.failed();
+                // Hide the loading indicator and label
+                Platform.runLater(() -> {
+                    loadingIndicator.setVisible(false);
+                    loadingLabel.setVisible(false);
+                });
+                showAlert("Loading Failed", "Unable to load treks. Please try again later.");
+            }
+        };
+
+        // Run the task on a new thread
+        new Thread(task).start();
     }
 
     private void addTrekTiles(List<Trek> treks) {
+        System.out.println("Adding trek tiles");
         for (Trek trek : treks) {
             addTrekTile(trek, trekCount % 3, trekCount / 3);
             trekCount++;
@@ -89,13 +176,14 @@ public class HomePage extends Application {
     private void addTrekTile(Trek trek, int row, int col) {
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
-        vbox.setStyle("-fx-background-color: #fff; -fx-border-color: #ddd; -fx-border-radius: 5px; -fx-background-radius: 5px;");
+        vbox.setStyle("-fx-background-color: #fff; -fx-border-color: #ddd; -fx-border-radius: 10px; -fx-background-radius: 10px;");
 
         Image image = new Image(trek.getImageUrl().get(0)); // Assuming the first URL is the primary image
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(300);
         imageView.setFitHeight(200);
         imageView.setPreserveRatio(true);
+        imageView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 10);");
 
         Label nameLabel = new Label(trek.getFortName());
         nameLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333;");
@@ -110,7 +198,13 @@ public class HomePage extends Application {
         grid.add(vbox, row, col);
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    private void showAlert(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
     }
 }
