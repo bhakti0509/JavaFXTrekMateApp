@@ -1,6 +1,10 @@
 package com.trekmate.view.settings;
 
-import javafx.application.Application;
+import com.trekmate.manager.SceneManager;
+import com.trekmate.view.components.NavBar;
+
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -9,203 +13,127 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
-// import javafx.stage.Screen;
-import javafx.stage.Stage;
+import javafx.stage.Screen;
 
-public class SettingsPage extends Application {
+import java.util.Arrays;
+import java.util.List;
 
-    private Stage primaryStage;
-    private Scene settingsScene; // Store the settings scene reference
+public class SettingsPage {
 
-    @Override
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-        primaryStage.setTitle("TrekMate");
-       // primaryStage.setHeight(1080);
-        //primaryStage.setWidth(2080);
+    private static final String BACKGROUND_IMAGE_PATH = "/images/SettingsBg.jpg";
+    private static final String NOTIFICATION_IMAGE_PATH = "/images/NotificationLogo.jpg";
+    private static final String LANGUAGE_IMAGE_PATH = "/images/LanguagesLogo.jpg";
+    private static final String CHANGE_PASSWORD_IMAGE_PATH = "/images/LockLogo.jpg";
+    private static final String TERMS_IMAGE_PATH = "/images/TandC.jpg";
+    private static final String ABOUT_IMAGE_PATH = "/images/aboutUs.jpg";
 
-        // Remove the settings icon
+    private static final List<String> LANGUAGES = Arrays.asList("English", "Hindi", "Spanish", "French", "German");
 
+    private SceneManager sceneManager;
+
+    public SettingsPage(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
+    }
+
+    public Scene createScene() {
+        // Load background image
+        BackgroundImage backgroundImage = new BackgroundImage(
+                new Image(SettingsPage.class.getResourceAsStream(BACKGROUND_IMAGE_PATH)),
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT, new BackgroundSize(400, 100, false, false, true, true)
+        );
+
+        // Root StackPane
+        StackPane root = new StackPane();
+        root.setBackground(new Background(backgroundImage));
+
+        // Main layout VBox
+        VBox layout = new VBox(20);
+        layout.setAlignment(Pos.TOP_CENTER);
+
+        // Navigation bar
+        NavBar navBar = new NavBar(sceneManager);
+        HBox navBarBox = navBar.createNavBar();
+        layout.getChildren().add(navBarBox);
+
+        // Settings grid
+        GridPane grid = createSettingsGrid();
+        layout.getChildren().add(grid);
+
+        // Add layout to root StackPane
+        root.getChildren().add(layout);
+
+        // Create and return scene
+        return new Scene(root, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+    }
+
+    private GridPane createSettingsGrid() {
         GridPane grid = new GridPane();
         grid.setVgap(20);
         grid.setHgap(10);
         grid.setPadding(new Insets(20, 10, 10, 10));
-        grid.setAlignment(Pos.CENTER); // Center the grid
+        grid.setAlignment(Pos.CENTER);
 
-        // Load notification icon
-        Image notificationImage = new Image(getClass().getResourceAsStream("/images/NotificationLogo.jpg"));
-        ImageView notificationImageView = new ImageView(notificationImage);
-        notificationImageView.setFitWidth(40);
-        notificationImageView.setFitHeight(40);
-        grid.add(notificationImageView, 0, 0);
-
-        // Notifications setting
-        Label notificationsLabel = new Label("Notifications:");
-        notificationsLabel.setFont(new Font(20));
-        notificationsLabel.setAlignment(Pos.CENTER); // Center the label
-        GridPane.setHalignment(notificationsLabel, javafx.geometry.HPos.CENTER); // Center horizontally in cell
+        // Notifications
+        ImageView notificationImageView = createImageView(NOTIFICATION_IMAGE_PATH, 40, 40);
+        Label notificationsLabel = createCenteredLabel("Notifications", 20);
         CheckBox notificationsCheckbox = new CheckBox();
-        notificationsCheckbox.setMaxSize(70, 70);
-
+        grid.add(notificationImageView, 0, 0);
         grid.add(notificationsLabel, 1, 0);
         grid.add(notificationsCheckbox, 2, 0);
 
-        // Load language icon
-        Image languageImage = new Image(getClass().getResourceAsStream("/images/LanguagesLogo.jpg"));
-        ImageView languageImageView = new ImageView(languageImage);
-        languageImageView.setFitWidth(40);
-        languageImageView.setFitHeight(40);
-        grid.add(languageImageView, 0, 1);
-
-        // App language setting
-        Label languageLabel = new Label("App Language:");
-        languageLabel.setFont(new Font(20));
-        languageLabel.setAlignment(Pos.CENTER); // Center the label
-        GridPane.setHalignment(languageLabel, javafx.geometry.HPos.CENTER); // Center horizontally in cell
+        // Language
+        ImageView languageImageView = createImageView(LANGUAGE_IMAGE_PATH, 40, 40);
+        Label languageLabel = createCenteredLabel("App Language", 20);
         ChoiceBox<String> languageChoiceBox = new ChoiceBox<>();
-        languageChoiceBox.getItems().addAll("English", "Hindi", "Spanish", "French", "German");
+        languageChoiceBox.getItems().addAll(LANGUAGES);
         languageChoiceBox.setValue("English");
-        GridPane.setHalignment(languageChoiceBox, javafx.geometry.HPos.CENTER); // Center horizontally in cell
-
+        grid.add(languageImageView, 0, 1);
         grid.add(languageLabel, 1, 1);
         grid.add(languageChoiceBox, 2, 1);
 
-        // Load change password icon
-        Image changePasswordImage = new Image(getClass().getResourceAsStream("/images/LockLogo.jpg"));
-        ImageView changePasswordImageView = new ImageView(changePasswordImage);
-        changePasswordImageView.setFitWidth(40);
-        changePasswordImageView.setFitHeight(40);
+        // Change Password
+        ImageView changePasswordImageView = createImageView(CHANGE_PASSWORD_IMAGE_PATH, 40, 40);
+        Button changePasswordButton = createCenteredButton("Change Password", event -> sceneManager.switchTo("ChangePassword"));
         grid.add(changePasswordImageView, 0, 2);
-
-        // Change password button
-        Button changePasswordButton = new Button("Change Password");
-        changePasswordButton.setOnAction(event -> openChangePasswordWindow());
-        changePasswordButton.setAlignment(Pos.CENTER); // Center the button
-        GridPane.setHalignment(changePasswordButton, javafx.geometry.HPos.CENTER); // Center horizontally in cell
-
         grid.add(changePasswordButton, 1, 2);
 
-        // Load terms & conditions icon
-        Image termsImage = new Image(getClass().getResourceAsStream("/images/TandC.jpg"));
-        ImageView termsImageView = new ImageView(termsImage);
-        termsImageView.setFitWidth(40);
-        termsImageView.setFitHeight(40);
-        grid.add(termsImageView, 0, 3);
-
         // Terms & Conditions
-        Button termsButton = new Button("Terms & Conditions");
-        termsButton.setOnAction(event -> showTermsAndConditions());
-        termsButton.setAlignment(Pos.CENTER); // Center the button
-        GridPane.setHalignment(termsButton, javafx.geometry.HPos.CENTER); // Center horizontally in cell
-
+        ImageView termsImageView = createImageView(TERMS_IMAGE_PATH, 40, 40);
+        Button termsButton = createCenteredButton("Terms & Conditions", event -> sceneManager.switchTo("TermsAndConditions"));
+        grid.add(termsImageView, 0, 3);
         grid.add(termsButton, 1, 3);
 
-        // Load about us icon
-        Image aboutImage = new Image(getClass().getResourceAsStream("/images/aboutUs.jpg"));
-        ImageView aboutImageView = new ImageView(aboutImage);
-        aboutImageView.setFitWidth(40);
-        aboutImageView.setFitHeight(40);
-        grid.add(aboutImageView, 0, 4);
-
         // About Us
-        Button aboutButton = new Button("About Us");
-        aboutButton.setOnAction(event -> showAboutUs());
-        aboutButton.setAlignment(Pos.CENTER); // Center the button
-        GridPane.setHalignment(aboutButton, javafx.geometry.HPos.CENTER); // Center horizontally in cell
-
+        ImageView aboutImageView = createImageView(ABOUT_IMAGE_PATH, 40, 40);
+        Button aboutButton = createCenteredButton("About Us", event -> sceneManager.switchTo("AboutUs"));
+        grid.add(aboutImageView, 0, 4);
         grid.add(aboutButton, 1, 4);
 
-        // Load arrow icon
-        Image arrowImage = new Image(getClass().getResourceAsStream("/images/BackButtonLogo.jpg"));
-        ImageView arrowImageView = new ImageView(arrowImage);
-        arrowImageView.setFitWidth(15);
-        arrowImageView.setFitHeight(15);
-
-        // Back button
-        Button backButton = new Button("Back", arrowImageView);
-        // backButton.setOnAction(event -> backToMain()); // Go back to main scene
-        backButton.setOnAction(event -> primaryStage.setScene(settingsScene));
-        backButton.setAlignment(Pos.CENTER); // Center the button
-        GridPane.setHalignment(backButton, javafx.geometry.HPos.CENTER); // Center horizontally in cell
-
-        grid.add(backButton, 1, 5);
-
-        // Set background image
-        Image backgroundImage = new Image(getClass().getResourceAsStream("/images/SettingsBg.jpg"));
-        BackgroundImage bgImage = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
-                new BackgroundSize(0, 0, true, true, true, true));
-        Background background = new Background(bgImage);
-        grid.setBackground(background);
-
-        settingsScene = new Scene(grid, 2080, 1080);
-        primaryStage.setScene(settingsScene);
+        return grid;
     }
 
-    private void openChangePasswordWindow() {
-        // Launch the ChangePassword scene
-        ChangePassword newPassword = new ChangePassword();
-        newPassword.start(primaryStage);
+    private ImageView createImageView(String imagePath, double fitWidth, double fitHeight) {
+        Image image = new Image(SettingsPage.class.getResourceAsStream(imagePath));
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(fitWidth);
+        imageView.setFitHeight(fitHeight);
+        return imageView;
     }
 
-    private void showTermsAndConditions() {
-        VBox vbox = new VBox(10);
-        vbox.setPadding(new Insets(10, 10, 10, 10));
-        vbox.setAlignment(Pos.CENTER); // Center the VBox
-        Label termsLabel = new Label("Terms & Conditions content goes here...");
-
-        // Load arrow icon
-        Image arrowImage = new Image(getClass().getResourceAsStream("/images/BackButtonLogo.jpg"));
-        ImageView arrowImageView = new ImageView(arrowImage);
-        arrowImageView.setFitWidth(15);
-        arrowImageView.setFitHeight(15);
-
-        Button backButton = new Button("Back", arrowImageView);
-        backButton.setOnAction(event -> backToMain()); // Go back to main scene
-
-        vbox.getChildren().addAll(termsLabel, backButton);
-
-        Scene termsScene = new Scene(vbox, 2080, 1080);
-        primaryStage.setScene(termsScene);
+    private Label createCenteredLabel(String text, double fontSize) {
+        Label label = new Label(text);
+        label.setFont(new Font(fontSize));
+        label.setAlignment(Pos.CENTER);
+        GridPane.setHalignment(label, javafx.geometry.HPos.CENTER);
+        return label;
     }
 
-    private void showAboutUs() {
-        VBox vbox = new VBox(20); // Increased spacing to ensure elements are properly separated
-        vbox.setPadding(new Insets(50, 50, 50, 50)); // Increased padding to avoid elements touching edges
-        vbox.setAlignment(Pos.CENTER); // Center the VBox
-
-        Label aboutLabel = new Label("About Us");
-        aboutLabel.setFont(new Font(20));
-        Label groupNameLabel = new Label("Group Name: Bug Optimizers");
-        Label membersLabel = new Label("Group Members:\n- Bhakti Satpute\n- Sarita Disale");
-        Label conceptsLabel = new Label(
-                "Concepts Used:\n- Inheritance\n- Polymorphism\n- Abstraction\n- Interface\n- Exception Handling\n- JavaFX\n- Maven\n- MVC Pattern\n- Firestore");
-
-        // Load arrow icon
-        Image arrowImage = new Image(getClass().getResourceAsStream("/images/BackButtonLogo.jpg"));
-        ImageView arrowImageView = new ImageView(arrowImage);
-        arrowImageView.setFitWidth(15);
-        arrowImageView.setFitHeight(15);
-
-        Button backButton = new Button("Back", arrowImageView);
-        backButton.setOnAction(event -> primaryStage.setScene(settingsScene)); // Set back button action to switch back
-                                                                               // to settings page
-
-        // Set background image for the about page
-        Image aboutBackgroundImage = new Image(getClass().getResourceAsStream("/images/ProfPageBg.jpg"));
-        BackgroundImage aboutBgImage = new BackgroundImage(aboutBackgroundImage, BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
-                new BackgroundSize(0, 0, true, true, true, true));
-        Background aboutBackground = new Background(aboutBgImage);
-        vbox.setBackground(aboutBackground);
-
-        vbox.getChildren().addAll(aboutLabel, groupNameLabel, membersLabel, conceptsLabel, backButton);
-
-        Scene aboutScene = new Scene(vbox, 2080, 1080); // Adjust size as needed
-        primaryStage.setScene(aboutScene);
-    }
-
-    private void backToMain() {
-            primaryStage.setScene(settingsScene); // Go back to main scene
+    private Button createCenteredButton(String text, EventHandler<ActionEvent> handler) {
+        Button button = new Button(text);
+        button.setOnAction(handler);
+        button.setAlignment(Pos.CENTER);
+        GridPane.setHalignment(button, javafx.geometry.HPos.CENTER);
+        return button;
     }
 }
