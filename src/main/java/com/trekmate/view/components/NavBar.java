@@ -17,12 +17,10 @@ import javafx.stage.Screen;
 
 public class NavBar {
 
-    private UserSession userSession;
     private SceneManager sceneManager;
 
     public NavBar(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
-        this.userSession = new UserSession();
     }
 
     public HBox createNavBar() {
@@ -38,15 +36,15 @@ public class NavBar {
         Button myBookingsButton = createNavButton("My Bookings", this::handleMyBookings);
         Button leaderboardButton = createNavButton("Leaderboard", this::handleLeaderboard);
 
-        if (userSession.isLoggedIn()) {
-            User userDetails = userSession.getUserDetails();
+        if (UserSession.isLoggedIn()) {
+            User userDetails = UserSession.getUserDetails();
             String firstName = userDetails.getFirstName();
             String lastName = userDetails.getLastName();
             MenuButton profileButton = createDropDownButton(firstName + " " + lastName);
             Button createTrekButton = createNavButton("Add Trek", this::handleCreateTrek);
 
             navBar.getChildren().addAll(logoView, appName, homePageButton, myBookingsButton, leaderboardButton);
-            if (userSession.isAdmin()) {
+            if (UserSession.isAdmin()) {
                 navBar.getChildren().add(createTrekButton);
             }
             navBar.getChildren().add(profileButton);
@@ -145,7 +143,7 @@ public class NavBar {
     }
 
     private void handleLogout() {
-        userSession.logout();
+        UserSession.logout();
         sceneManager.switchTo("SignInPage");
     }
 }

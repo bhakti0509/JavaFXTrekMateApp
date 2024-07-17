@@ -35,16 +35,14 @@ public class ProfilePage {
     private Button uploadProfilePhotoButton;
     private Circle vehicleCircle;
     private SceneManager sceneManager;
-    private UserSession userSession;
 
     public ProfilePage(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
-        this.userSession = new UserSession();
     }
 
     public Scene createScene() {
         // Fetch user details from session
-        User user = userSession.getUserDetails();
+        User user = UserSession.getUserDetails();
 
         // Create the profile picture
         if (user != null && user.getProfilePictureUrl() != null && !user.getProfilePictureUrl().isEmpty()) {

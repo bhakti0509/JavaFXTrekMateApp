@@ -14,6 +14,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Screen;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.regex.Pattern;
@@ -21,12 +22,10 @@ import java.util.regex.Pattern;
 public class SignInPage {
 
     private final AuthController authController;
-    private final UserSession userSession;
     private final SceneManager sceneManager;
 
     public SignInPage(SceneManager sceneManager) {
         this.authController = new AuthController();
-        this.userSession = new UserSession();
         this.sceneManager = sceneManager;
     }
 
@@ -107,7 +106,7 @@ public class SignInPage {
 
                         if (user != null) {
                             // Save the user details in the session
-                            userSession.saveUserDetails(user);
+                            UserSession.saveUserDetails(user);
                         } else {
                             throw new IllegalArgumentException("Invalid email or password.");
                         }
@@ -119,6 +118,10 @@ public class SignInPage {
                         super.succeeded();
                         // Hide the loading indicator
                         loadingIndicator.setVisible(false);
+                        // get stage 
+                        Stage stage = (Stage) loginButton.getScene().getWindow();
+
+                        sceneManager.addOrUpdateScenes(stage); // Refresh the scene to update the user details
                         sceneManager.switchTo("HomePage");
                     }
 

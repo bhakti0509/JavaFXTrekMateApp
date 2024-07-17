@@ -1,7 +1,9 @@
 package com.trekmate.view.auth;
 
-import com.trekmate.firebase.FirebaseAuthService;
+import com.trekmate.controller.AuthController;
 import com.trekmate.manager.SceneManager;
+import com.trekmate.model.User;
+
 import javafx.animation.FadeTransition;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -17,12 +19,12 @@ import java.util.regex.Pattern;
 
 public class SignUpPage {
 
-    private FirebaseAuthService firebaseAuthService;
+    private AuthController authController;
     private SceneManager sceneManager;
     private StackPane stackPane;
 
     public SignUpPage(SceneManager sceneManager) {
-        this.firebaseAuthService = new FirebaseAuthService();
+        this.authController = new AuthController();
         this.sceneManager = sceneManager;
     }
 
@@ -154,7 +156,10 @@ public class SignUpPage {
         Task<Void> signUpTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
-                firebaseAuthService.createUser(email, password, username, firstName, lastName, "user");
+
+                // Sign up the user
+                User user = createUser(firstName, lastName, email, username, password);
+                authController.signUp(user);
                 return null;
             }
 
@@ -208,5 +213,15 @@ public class SignUpPage {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private User createUser(String firstName, String lastName, String email, String username, String password) {
+        User user = new User();
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setUsername(username);
+        user.setPassword(password);
+        return user;
     }
 }

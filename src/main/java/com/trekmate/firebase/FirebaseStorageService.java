@@ -41,7 +41,7 @@ public class FirebaseStorageService {
     }
 
     public String uploadImage(File file) throws InterruptedException, ExecutionException, IOException {
-        String blobString = "images/" + UUID.randomUUID() + "-" + file.getName();
+        String blobString = "images/" + UUID.randomUUID();
 
         BlobId blobId = BlobId.of(bucketName, blobString);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId)

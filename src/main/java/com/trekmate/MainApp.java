@@ -1,31 +1,23 @@
 package com.trekmate;
 
+import com.trekmate.manager.SceneManager;
 import com.trekmate.session.UserSession;
-import com.trekmate.view.auth.SignInPage;
-import com.trekmate.view.homePage.HomePage;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
 
-    private UserSession userSession = new UserSession();
-
     @Override
     public void start(Stage primaryStage) {
+        SceneManager sceneManager = new SceneManager(primaryStage);
 
-        // Load the sign in page if the user is not logged in else load the user page
-        if (userSession.isLoggedIn()) {
-            HomePage homePage = new HomePage();
-            homePage.start(primaryStage);
-           
+        // Load the appropriate page based on user session
+        if (UserSession.isLoggedIn()) {
+            sceneManager.switchTo("HomePage");
         } else {
-            // Load the sign in page
-            SignInPage signInPage = new SignInPage();
-            signInPage.start(primaryStage);
-            
+            sceneManager.switchTo("SignInPage");
         }
-        
     }
 
     public static void main(String[] args) {
