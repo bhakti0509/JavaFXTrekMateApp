@@ -9,6 +9,7 @@ import com.trekmate.model.Trek;
 import com.trekmate.view.auth.SignInPage;
 import com.trekmate.view.auth.SignUpPage;
 import com.trekmate.view.homePage.HomePage;
+import com.trekmate.view.leaderboard.LeaderboardPage;
 import com.trekmate.view.settings.ChangePassword;
 import com.trekmate.view.settings.ProfilePage;
 import com.trekmate.view.settings.SettingsPage;
@@ -62,6 +63,9 @@ public class SceneManager {
         AddTrekPage addTrekPage = new AddTrekPage(this);
         Scene addTrekScene = addTrekPage.createScene();
 
+        LeaderboardPage leaderboardPage = new LeaderboardPage(this);
+        Scene leaderboardScene = leaderboardPage.createScene();
+
         this.addScene("SignInPage", signInScene);
         this.addScene("SignUpPage", signUpScene);
         this.addScene("HomePage", homeScene);
@@ -69,6 +73,7 @@ public class SceneManager {
         this.addScene("ChangePassword", changePasswordScene);
         this.addScene("ProfilePage", profileScene);
         this.addScene("AddTrekPage", addTrekScene);
+        this.addScene("LeaderboardPage", leaderboardScene);
     }
 
     public void loadTrekDetails(Trek trek) {
