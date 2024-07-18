@@ -16,6 +16,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -42,19 +43,19 @@ public class HomePage {
 
     public Scene getScene(Stage primaryStage) {
         // Load the background image
-        Image backgroundImage = new Image("images/RajgadFort.jpg");
-        BackgroundImage background = new BackgroundImage(
-                backgroundImage,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.DEFAULT,
-                new BackgroundSize(400, 100, false, false, true, true)
-        );
+        Image backgroundImage = new Image("images/Hiking.jpg");
+        ImageView backgroundImageView = new ImageView(backgroundImage);
+        backgroundImageView.setFitWidth(Screen.getPrimary().getBounds().getWidth());
+        backgroundImageView.setFitHeight(Screen.getPrimary().getBounds().getHeight());
+        backgroundImageView.setPreserveRatio(true);
 
         // Create the StackPane and set its background
         StackPane stackPane = new StackPane();
-        stackPane.setBackground(new Background(background));
-        stackPane.setPrefSize(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+        stackPane.getChildren().add(backgroundImageView);
+
+        Rectangle overlay = new Rectangle(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight() / 1.6);
+        overlay.setFill(javafx.scene.paint.Color.rgb(0,0,0,0.4)); // Adjust the opacity as needed
+        stackPane.getChildren().add(overlay);
 
         // Create the VBox layout
         VBox layout = new VBox(20);
@@ -64,6 +65,16 @@ public class HomePage {
 
         NavBar navBarComponent = new NavBar(sceneManager);
         layout.getChildren().add(navBarComponent.createNavBar());
+
+        // Add the tagline label
+        Label taglineLabel = new Label("Explore the Best Treks with TrekMate");
+        taglineLabel.setStyle("-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #333;");
+        layout.getChildren().add(taglineLabel);
+
+        // Add the "Upcoming Treks" label
+        Label upcomingTreksLabel = new Label("Upcoming Treks");
+        upcomingTreksLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #333;");
+        layout.getChildren().add(upcomingTreksLabel);
 
         // Add the GridPane for the treks
         layout.getChildren().add(createGrid());
@@ -94,7 +105,7 @@ public class HomePage {
 
     private GridPane createGrid() {
         grid = new GridPane();
-        grid.setPadding(new Insets(20));
+        grid.setPadding(new Insets(100, 20, 20, 20));
         grid.setVgap(20);
         grid.setHgap(20);
         grid.setAlignment(Pos.TOP_CENTER);
@@ -180,8 +191,8 @@ public class HomePage {
 
         Image image = new Image(trek.getImageUrl().get(0)); // Assuming the first URL is the primary image
         ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(300);
-        imageView.setFitHeight(200);
+        imageView.setFitWidth(400);
+        imageView.setFitHeight(250);
         imageView.setPreserveRatio(true);
         imageView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 10);");
 
