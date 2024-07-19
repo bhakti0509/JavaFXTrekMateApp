@@ -205,7 +205,11 @@ public class HomePage {
         Label locationLabel = new Label("Location: " + trek.getLocation());
         locationLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #666;");
 
-        vbox.getChildren().addAll(imageView, nameLabel, difficultyLabel, locationLabel);
+        Button viewButton = new Button("View");
+        viewButton.setStyle("-fx-background-color: #007bff; -fx-text-fill: white;");
+        viewButton.setOnAction(event -> sceneManager.loadTrekDetails(trek));
+
+        vbox.getChildren().addAll(imageView, nameLabel, difficultyLabel, locationLabel, viewButton);
         grid.add(vbox, row, col);
     }
 
