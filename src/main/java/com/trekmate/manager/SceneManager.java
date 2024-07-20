@@ -5,6 +5,7 @@ import javafx.stage.Stage;
 
 import java.util.HashMap;
 
+import com.trekmate.model.Trek;
 import com.trekmate.view.auth.SignInPage;
 import com.trekmate.view.auth.SignUpPage;
 import com.trekmate.view.homePage.HomePage;
@@ -18,6 +19,7 @@ import com.trekmate.view.settings.SettingsPage;
 
 import com.trekmate.view.settings.TermsAndConditions;
 import com.trekmate.view.trek.AddTrekPage;
+import com.trekmate.view.trek.TrekDetailsPage;
 import com.trekmate.view.trek.MyBooking;
 
 public class SceneManager {
@@ -90,6 +92,15 @@ public class SceneManager {
         this.addScene("ProfilePage", profileScene);
         this.addScene("AddTrekPage", addTrekScene);
         this.addScene("LeaderboardPage", leaderboardScene);
+    }
+
+    public void loadTrekDetails(Trek trek) {
+        TrekDetailsPage trekDetailsPage = new TrekDetailsPage(trek);
+        Scene trekDetailsScene = trekDetailsPage.getScene(this);
+        this.addScene("TrekDetailsPage", trekDetailsScene);
+        switchTo("TrekDetailsPage");
+    }
+}
         this.addScene("TermsAndConditions", termScene); 
         this.addScene("MyBooking", myBookingScene);
 

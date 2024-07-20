@@ -28,7 +28,7 @@ public class LeaderboardPage {
 
     private static final String BACKGROUND_IMAGE_PATH = "/images/Lb.jpg";
     private static final String LOGO_IMAGE_PATH = "/images/logo.png";
-    private static final String STAR_IMAGE_PATH = "/images/ranking.jpg";
+    private static final String STAR_IMAGE_PATH = "/images/Ranking.jpg";
 
     private SceneManager sceneManager;
     private ObservableList<Member> members;
