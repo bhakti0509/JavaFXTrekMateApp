@@ -92,6 +92,10 @@ public class SceneManager {
         this.addScene("ProfilePage", profileScene);
         this.addScene("AddTrekPage", addTrekScene);
         this.addScene("LeaderboardPage", leaderboardScene);
+    
+        this.addScene("TermsAndConditions", termScene); 
+        this.addScene("MyBooking", myBookingScene);
+
     }
 
     public void loadTrekDetails(Trek trek) {
@@ -99,11 +103,6 @@ public class SceneManager {
         Scene trekDetailsScene = trekDetailsPage.getScene(this);
         this.addScene("TrekDetailsPage", trekDetailsScene);
         switchTo("TrekDetailsPage");
-    }
-}
-        this.addScene("TermsAndConditions", termScene); 
-        this.addScene("MyBooking", myBookingScene);
-
     }
 
     public void refreshMyBookingsPage() {

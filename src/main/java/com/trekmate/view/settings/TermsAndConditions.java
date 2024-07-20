@@ -1,11 +1,13 @@
 package com.trekmate.view.settings;
 
 import com.trekmate.manager.SceneManager;
+import com.trekmate.model.Trek;
+import com.trekmate.view.trek.TrekDetailsPage;
+
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
-import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 
 public class TermsAndConditions {
@@ -21,7 +23,12 @@ public class TermsAndConditions {
         WebView termsWebView = new WebView();
         termsWebView.getEngine().loadContent(getTermsAndConditionsHtml());
         termsWebView.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
-
+    public void loadTrekDetails(Trek trek) {
+        TrekDetailsPage trekDetailsPage = new TrekDetailsPage(trek);
+        Scene trekDetailsScene = trekDetailsPage.getScene(this);
+        this.addScene("TrekDetailsPage", trekDetailsScene);
+        switchTo("TrekDetailsPage");
+    }
         // Create a VBox for the content
         VBox contentBox = new VBox(10, termsWebView, createBackButton());
         contentBox.setStyle("-fx-background-color: #f0f0f0; -fx-padding: 20px;");
