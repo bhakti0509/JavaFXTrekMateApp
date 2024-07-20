@@ -100,7 +100,7 @@ public class SettingsPage {
 
         // Terms & Conditions
         ImageView termsImageView = createImageView(TERMS_IMAGE_PATH, 40, 40);
-        Button termsButton = createCenteredButton("Terms & Conditions", event -> sceneManager.switchTo("TermsAndConditions"));
+        Button termsButton = createCenteredButton("Terms & Conditions ", event -> sceneManager.switchTo("TermsAndConditions"));
         grid.add(termsImageView, 0, 3);
         grid.add(termsButton, 1, 3);
 
