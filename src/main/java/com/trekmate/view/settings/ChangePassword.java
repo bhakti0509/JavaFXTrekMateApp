@@ -36,7 +36,7 @@ public class ChangePassword {
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.CENTER,
-                new BackgroundSize(800, 600, false, false, true, false));
+                new BackgroundSize(1000, 600, false, false, true, false));
 
         // Create a Pane and set its background
         Pane pane = new Pane();
@@ -105,6 +105,6 @@ public class ChangePassword {
         scaleTransition.play();
 
         // Setting the scene
-        return new Scene(pane, 800, 600);
+        return new Scene(pane, 2080, 1080);
     }
 }

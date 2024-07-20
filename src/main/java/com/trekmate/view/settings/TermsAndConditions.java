@@ -8,7 +8,6 @@ import javafx.scene.web.WebView;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 
-
 public class TermsAndConditions {
 
     private SceneManager sceneManager;
@@ -28,7 +27,7 @@ public class TermsAndConditions {
         contentBox.setStyle("-fx-background-color: #f0f0f0; -fx-padding: 20px;");
 
         // Create the Scene
-        Scene scene = new Scene(contentBox, 1280, 800);
+        Scene scene = new Scene(contentBox, 2080, 1080);
         return scene;
     }
 
@@ -38,7 +37,7 @@ public class TermsAndConditions {
                 + "<p><strong>Last updated:</strong> [17/7/2024]</p>"
                 + "<p>Welcome to <strong>TrekMate</strong>!</p>"
                 + "<p>These terms and conditions outline the rules and regulations for the use of <strong>TrekMate</strong>, "
-                + "</p>"
+                + "located at [Website URL].</p>"
                 + "<p>By accessing this app, we assume you accept these terms and conditions. "
                 + "Do not continue to use <strong>TrekMate</strong> if you do not agree to take all of the terms and conditions stated on this page.</p>"
                 + "<h3>1. Introduction</h3>"
@@ -68,19 +67,21 @@ public class TermsAndConditions {
                 + "<h3>6. Changes to Terms and Conditions</h3>"
                 + "<p><strong>6.1</strong> We may revise these terms and conditions from time to time. Revised terms and conditions will apply to the use of this app from the date of the publication of the revised terms and conditions on this app.</p>"
                 + "</body></html>";
-}
+    }
 
-   
-private Button createBackButton() {
-    Button backButton = new Button("> > >");
-    backButton.setStyle("-fx-background-color: #CCCCCC;"); // Set initial color
-    backButton.setOnMousePressed(e -> backButton.setStyle("-fx-background-color: #AAAAAA;")); // Darker color when pressed
-    backButton.setOnMouseReleased(e -> backButton.setStyle("-fx-background-color: #CCCCCC;")); // Restore color when released
-    backButton.setOnAction(e -> handleBack());
-    return backButton;
-}
-private void handleBack() {
-    System.out.println("Back button clicked. Navigating back to SettingsPage...");
-    sceneManager.switchTo("SettingsPage");
-}
+    private Button createBackButton() {
+        Button backButton = new Button("> > >");
+        backButton.setStyle("-fx-background-color: #CCCCCC;"); // Set initial color
+        backButton.setOnMousePressed(e -> backButton.setStyle("-fx-background-color: #AAAAAA;")); // Darker color when
+                                                                                                  // pressed
+        backButton.setOnMouseReleased(e -> backButton.setStyle("-fx-background-color: #CCCCCC;")); // Restore color when
+                                                                                                   // released
+        backButton.setOnAction(e -> handleBack());
+        return backButton;
+    }
+
+    private void handleBack() {
+        System.out.println("Back button clicked. Navigating back to SettingsPage...");
+        sceneManager.switchTo("SettingsPage");
+    }
 }

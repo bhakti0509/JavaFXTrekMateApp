@@ -53,7 +53,7 @@ public class AboutUs {
         groupNameLabel.setFont(Font.font("Arial", FontWeight.BOLD, 15));
         groupNameLabel.setTextFill(Color.WHITE);
 
-        Label membersLabel = new Label("Group Members:\n- Bhakti Satpute\n- Sarita Disale\n- Priyanka ");
+        Label membersLabel = new Label("Group Members:\n- Bhakti Satpute\n- Sarita Disale \n- Priyanka Karmalkar");
         membersLabel.setFont(Font.font(20));
         membersLabel.setTextFill(Color.WHITE);
 
@@ -62,17 +62,17 @@ public class AboutUs {
         conceptsLabel.setTextFill(Color.WHITE);
 
         // Create images for social media icons (mocking images)
-        Image instagramIcon = new Image("/images/logo.png");
+        Image instagramIcon = new Image("images/instagram.png");
         ImageView instagramView = new ImageView(instagramIcon);
         instagramView.setFitWidth(70);
         instagramView.setPreserveRatio(true);
 
-        Image linkedinIcon = new Image("/images/logo.png");
+        Image linkedinIcon = new Image("images/linkedin.png");
         ImageView linkedinView = new ImageView(linkedinIcon);
         linkedinView.setFitWidth(70);
         linkedinView.setPreserveRatio(true);
 
-        Image facebookIcon = new Image("/images/logo.png");
+        Image facebookIcon = new Image("images/facebook.png");
         ImageView facebookView = new ImageView(facebookIcon);
         facebookView.setFitWidth(70);
         facebookView.setPreserveRatio(true);
@@ -111,7 +111,7 @@ public class AboutUs {
         mainLayout.setMinWidth(Screen.getPrimary().getBounds().getWidth());
 
         // Set background image for the main layout
-        Image backgroundImage = new Image("/images/Pastel2.jpg");
+        Image backgroundImage = new Image("images/aboutus1.jpg");
         BackgroundImage background = new BackgroundImage(
                 backgroundImage,
                 BackgroundRepeat.NO_REPEAT,

@@ -1,4 +1,4 @@
-/*package com.trekmate.view.homePage;
+package com.trekmate.view.homePage;
 
 import com.google.cloud.firestore.collection.LLRBNode.Color;
 import com.trekmate.firebase.FirebaseTrekService;
@@ -220,9 +220,9 @@ public class HomePage {
         });
     }
 }
-*/
 
 
+/* 
 package com.trekmate.view.homePage;
 
 import com.google.cloud.storage.Acl.Group;
@@ -438,4 +438,4 @@ public class HomePage {
             alert.setContentText(message);
     });
   }
-}
+}*/
